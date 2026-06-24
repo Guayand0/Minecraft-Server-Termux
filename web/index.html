@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft Server Downloads</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Minecraft Server Downloads</h1>
+
+    <div class="filters">
+        <select id="server">
+            <option value="">Todos los servidores</option>
+        </select>
+
+        <select id="version">
+            <option value="">Todas las versiones</option>
+        </select>
+
+        <button id="search">Buscar</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Servidor</th>
+                <th>Versión</th>
+                <th>Build</th>
+                <th>Descarga</th>
+            </tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
