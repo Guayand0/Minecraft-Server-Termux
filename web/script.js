@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const response = await fetch(url, {
                     signal: controller.signal,
+                    cache: "no-store",
                     headers: {
                         Accept: "application/json"
                     }

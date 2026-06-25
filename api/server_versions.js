@@ -7,13 +7,10 @@ function setCorsHeaders(res) {
     res.setHeader("Vary", "Origin");
 }
 
-function setCacheHeaders(res, hasFilters) {
-    if (hasFilters) {
-        res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-        return;
-    }
-
-    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=900");
+function setNoCacheHeaders(res) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
 }
 
 function buildWhereClause(server, version) {
@@ -38,6 +35,7 @@ function buildWhereClause(server, version) {
 
 export default async function handler(req, res) {
     setCorsHeaders(res);
+    setNoCacheHeaders(res);
 
     if (req.method === "OPTIONS") {
         return res.status(204).end();
@@ -77,8 +75,6 @@ export default async function handler(req, res) {
             pool.query("SELECT id, version FROM versions ORDER BY id ASC").then(([rows]) => rows)
         ]);
 
-        setCacheHeaders(res, Boolean(server || version));
-
         return res.status(200).json({
             meta: {
                 count: data.length,
@@ -92,7 +88,6 @@ export default async function handler(req, res) {
         });
     } catch (error) {
         console.error("server_versions error:", error);
-        res.setHeader("Cache-Control", "no-store");
 
         return res.status(500).json({
             error: "Internal server error"
