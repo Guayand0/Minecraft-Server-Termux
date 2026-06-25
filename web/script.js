@@ -1,4 +1,3 @@
-const API_URL = getApiUrl();
 const STORAGE_KEY = "minecraft-server-termux-language";
 const DEFAULT_LANGUAGE = "es";
 
@@ -25,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentStatusKey = "loading";
     let currentToastKey = "";
     let toastTimer = null;
+    const apiUrls = getApiUrls();
 
     const selectedServers = new Set();
     const selectedMajors = new Set();
@@ -36,12 +36,26 @@ document.addEventListener("DOMContentLoaded", () => {
             ?? key;
     }
 
-    function getApiUrl() {
-        if (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null") {
-            return `${window.location.origin}/api/server_versions`;
+    function getApiUrls() {
+        const urls = [];
+
+        const remoteUrl = "https://minecraft-server-termux.vercel.app/api/server_versions";
+        const sameOrigin = (window.location && window.location.origin && window.location.origin !== "null")
+            ? `${window.location.origin}/api/server_versions`
+            : null;
+
+        if (window.MSD_API_URL && typeof window.MSD_API_URL === "string") {
+            urls.push(window.MSD_API_URL);
         }
 
-        return "https://minecraft-server-termux.vercel.app/api/server_versions";
+        urls.push(remoteUrl);
+
+        if (sameOrigin && sameOrigin !== remoteUrl) {
+            urls.push(sameOrigin);
+        }
+
+        urls.push("./api/server_versions");
+        return urls;
     }
 
     function getInitialLanguage() {
@@ -138,22 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadData() {
         setStatus("loading", true);
 
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), 15000);
-
         try {
-            const response = await fetch(API_URL, {
-                signal: controller.signal,
-                headers: {
-                    Accept: "application/json"
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`API responded with ${response.status}`);
-            }
-
-            const json = await response.json();
+            const json = await fetchDataFromApi();
 
             cachedData = Array.isArray(json.data) ? json.data : [];
             serverNames = Array.isArray(json.servers)
@@ -173,9 +173,37 @@ document.addEventListener("DOMContentLoaded", () => {
             renderRows([]);
             setStatus("loadError", false);
             showToast("loadError");
-        } finally {
-            window.clearTimeout(timeout);
         }
+    }
+
+    async function fetchDataFromApi() {
+        let lastError = null;
+
+        for (const url of apiUrls) {
+            const controller = new AbortController();
+            const timeout = window.setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    headers: {
+                        Accept: "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API responded with ${response.status} for ${url}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                lastError = error;
+            } finally {
+                window.clearTimeout(timeout);
+            }
+        }
+
+        throw lastError || new Error("Unable to load API data");
     }
 
     function buildVersionIndex(versions) {
