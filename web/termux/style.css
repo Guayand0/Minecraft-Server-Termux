@@ -309,6 +309,8 @@
         .commands {
             display: grid;
             gap: 16px;
+            width: 100%;
+            min-width: 0;
             padding: 0 34px 34px;
         }
 
@@ -316,11 +318,16 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 16px;
+            width: 100%;
+            min-width: 0;
         }
 
         .command-card {
             display: grid;
             gap: 14px;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
             padding: 18px;
             border: 1px solid rgba(180, 205, 255, 0.14);
             border-radius: 22px;
@@ -333,11 +340,14 @@
             align-items: flex-start;
             justify-content: space-between;
             gap: 16px;
+            width: 100%;
+            min-width: 0;
         }
 
         .command-title {
             display: grid;
             gap: 4px;
+            min-width: 0;
         }
 
         .command-title strong {
@@ -354,6 +364,7 @@
             border: 0;
             border-radius: 999px;
             padding: 10px 14px;
+            flex: 0 0 auto;
             color: #08111f;
             background: linear-gradient(135deg, var(--accent), var(--accent-3));
             box-shadow: 0 14px 30px rgba(102, 227, 255, 0.18);
@@ -372,20 +383,47 @@
         }
 
         .code-shell {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
             padding: 16px;
             border: 1px solid rgba(180, 205, 255, 0.14);
             border-radius: 18px;
             background: linear-gradient(180deg, rgba(3, 7, 14, 0.72), rgba(8, 13, 22, 0.95));
+            scrollbar-width: thin;
+            scrollbar-color: rgba(102, 227, 255, 0.35) rgba(255, 255, 255, 0.05);
         }
 
         pre {
             margin: 0;
-            overflow-x: auto;
+            width: max-content;
+            min-width: 100%;
             color: #eaf2ff;
             font-size: 0.96rem;
             line-height: 1.7;
-            white-space: pre-wrap;
-            word-break: break-word;
+            white-space: pre;
+            word-break: normal;
+            min-width: 0;
+        }
+
+        .code-shell::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .code-shell::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 999px;
+        }
+
+        .code-shell::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: rgba(102, 227, 255, 0.35);
+        }
+
+        .code-shell::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 227, 255, 0.5);
         }
 
         code {
@@ -395,17 +433,52 @@
 
         .status-row {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 10px;
             align-items: center;
             justify-content: space-between;
             margin-top: 2px;
+            width: 100%;
+            min-width: 0;
             color: var(--muted);
             font-size: 0.94rem;
         }
 
+        .url-preview {
+            display: block;
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: 100%;
+            margin-left: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding-bottom: 2px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(102, 227, 255, 0.35) rgba(255, 255, 255, 0.05);
+        }
+
+        .url-preview::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .url-preview::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 999px;
+        }
+
+        .url-preview::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: rgba(102, 227, 255, 0.35);
+        }
+
+        .url-preview::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 227, 255, 0.5);
+        }
+
         .status-pill {
             display: inline-flex;
+            flex: 0 0 auto;
             align-items: center;
             gap: 8px;
             min-height: 36px;
@@ -473,6 +546,26 @@
             margin: 0;
             color: var(--muted);
             line-height: 1.7;
+        }
+
+        .step-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 12px;
+            padding: 8px 12px;
+            border: 1px solid rgba(102, 227, 255, 0.22);
+            border-radius: 999px;
+            color: #dff8ff;
+            background: rgba(102, 227, 255, 0.08);
+            font-size: 0.92rem;
+            font-weight: 700;
+            transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+        }
+
+        .step-link:hover {
+            transform: translateY(-1px);
+            border-color: rgba(102, 227, 255, 0.42);
+            background: rgba(102, 227, 255, 0.14);
         }
 
         .info-grid {
@@ -556,6 +649,15 @@
             .copy-button {
                 width: 100%;
                 min-width: 0;
+                max-width: 100%;
                 justify-content: center;
+            }
+
+            .command-card,
+            .command-grid,
+            .commands,
+            .code-shell {
+                min-width: 0;
+                max-width: 100%;
             }
         }

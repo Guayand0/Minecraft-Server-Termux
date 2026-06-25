@@ -61,6 +61,7 @@
                     <p>
                         Pega el primer comando. Este paso actualiza el sistema e instala Debian.
                     </p>
+                    <a class="step-link" href="#command-1">Ir al comando 1</a>
                 </article>
 
                 <article class="step-card">
@@ -86,6 +87,7 @@
                     <p>
                         Pega el segundo comando. Este paso actualiza Debian, instala Java y descarga el servidor de Minecraft.
                     </p>
+                    <a class="step-link" href="#command-2">Ir al comando 2</a>
                 </article>
 
                 <article class="step-card">
@@ -108,7 +110,7 @@
 
             <section class="commands" aria-label="Comandos para copiar">
                 <div class="command-grid">
-                    <article class="command-card">
+                    <article class="command-card" id="command-1">
                         <div class="command-head">
                             <div class="command-title">
                                 <strong>Comando 1: instalar Debian en Termux</strong>
@@ -121,7 +123,7 @@
                         </div>
                     </article>
 
-                    <article class="command-card">
+                    <article class="command-card" id="command-2">
                         <div class="command-head">
                             <div class="command-title">
                                 <strong>Comando 2: descargar el servidor elegido</strong>
@@ -134,7 +136,7 @@
                         </div>
                         <div class="status-row">
                             <span id="selection-summary" class="status-pill"><span class="status-dot"></span>Cargando opciones...</span>
-                            <span id="url-preview" class="empty-state">La URL aparecera aqui.</span>
+                            <span id="url-preview" class="empty-state url-preview">La URL aparecera aqui.</span>
                         </div>
                     </article>
                 </div>
