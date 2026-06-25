@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${row.build}</td>
                     <td>
                         <a href="${row.url}" target="_blank">Descargar</a>
+                        <button onclick="copyUrl('${row.url}')">Copiar</button>
                     </td>
                 </tr>
             `;
@@ -109,5 +110,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     searchBtn.addEventListener("click", search);
 
+    function copyUrl(url) {
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                alert("URL copiada");
+            })
+            .catch(err => {
+                console.error("Error copiando:", err);
+            });
+    }
+
     loadData();
 });
+
+function copyUrl(url) {
+    navigator.clipboard.writeText(url)
+        .then(() => {
+            alert("URL copiada");
+        })
+        .catch(err => {
+            console.error("Error copiando:", err);
+        });
+}

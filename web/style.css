@@ -50,3 +50,9 @@ a {
     font-size: 12px;
     display: none;
 }
+
+button {
+    margin-left: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
