@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const versionFilters = document.getElementById("version-filters");
     const subversionWrap = document.getElementById("subversion-wrap");
     const subversionFilters = document.getElementById("version-subfilters");
+    const officialIndexLinks = document.getElementById("official-index-links");
     const results = document.getElementById("results");
     const sortButtons = document.querySelectorAll("[data-sort]");
     const clearFilterButtons = document.querySelectorAll("[data-clear-filter]");
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const metaDescription = document.querySelector('meta[name="description"]');
 
     let cachedData = [];
+    let serverEntries = [];
     let serverNames = [];
     let versionMap = new Map();
     let majorVersions = [];
@@ -98,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         applyStaticTranslations();
+        renderOfficialIndex();
         syncSortButtons();
         syncChipState(serverFilters, selectedServers);
         syncChipState(versionFilters, selectedMajors);
@@ -156,20 +159,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const json = await fetchDataFromApi();
 
             cachedData = Array.isArray(json.data) ? json.data : [];
-            serverNames = Array.isArray(json.servers)
+            serverEntries = Array.isArray(json.servers)
                 ? json.servers
                     .slice()
                     .sort((a, b) => Number(a.id ?? 0) - Number(b.id ?? 0))
-                    .map((server) => String(server.name))
+                    .map((server) => ({
+                        name: String(server.name ?? ""),
+                        url: String(server.url ?? "")
+                    }))
                 : [];
+            serverNames = serverEntries.map((server) => server.name);
 
             buildVersionIndex(Array.isArray(json.versions) ? json.versions : []);
             renderFilterButtons();
+            renderOfficialIndex();
             applyFilters();
             setStatus("ready", false);
         } catch (err) {
             console.error("Error API:", err);
             renderFilterButtons();
+            renderOfficialIndex();
             renderRows([]);
             setStatus("loadError", false);
             showToast("loadError");
@@ -239,6 +248,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         renderSubversionGroups();
+    }
+
+    function renderOfficialIndex() {
+        if (!officialIndexLinks) {
+            return;
+        }
+
+        officialIndexLinks.innerHTML = serverEntries
+            .filter((server) => server.name && server.url)
+            .map((server) => {
+                return `
+                    <a class="official-index-link" href="${escapeAttr(server.url)}" target="_blank" rel="noopener noreferrer">
+                        ${escapeHtml(server.name)}
+                    </a>
+                `;
+            })
+            .join("");
     }
 
     function renderSubversionGroups() {

@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 
         const [data, servers, versions] = await Promise.all([
             pool.query(dataQuery, params).then(([rows]) => rows),
-            pool.query("SELECT id, name FROM servers ORDER BY id ASC").then(([rows]) => rows),
+            pool.query("SELECT id, name, url FROM servers ORDER BY id ASC").then(([rows]) => rows),
             pool.query("SELECT id, version FROM versions ORDER BY id ASC").then(([rows]) => rows)
         ]);
 

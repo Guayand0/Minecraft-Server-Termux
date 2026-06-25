@@ -19,7 +19,7 @@ window.MSD_I18N = {
         clearButton: "Limpiar",
         buildsKicker: "Builds",
         downloadsTitle: "Descargas disponibles",
-        orderLabel: "Orden",
+        orderLabel: "Orden versiones",
         orderDesc: "Mayor a menor",
         orderAsc: "Menor a mayor",
         tableServer: "Servidor",
@@ -27,6 +27,7 @@ window.MSD_I18N = {
         tableBuild: "Build",
         tableDownload: "Descarga",
         tableLink: "Enlace",
+        officialIndexLabel: "Sitios oficiales",
         loading: "Cargando datos...",
         ready: "Datos listos",
         loadError: "No se pudo cargar",
@@ -34,6 +35,7 @@ window.MSD_I18N = {
         copyError: "No se pudo copiar",
         emptyState: "No hay resultados para estos filtros",
         download: "Descargar",
+        officialSite: "Sitio oficial",
         copy: "Copiar"
     },
     en: {
@@ -56,7 +58,7 @@ window.MSD_I18N = {
         clearButton: "Clear",
         buildsKicker: "Builds",
         downloadsTitle: "Available downloads",
-        orderLabel: "Sort",
+        orderLabel: "Version sort",
         orderDesc: "Newest first",
         orderAsc: "Oldest first",
         tableServer: "Server",
@@ -64,6 +66,7 @@ window.MSD_I18N = {
         tableBuild: "Build",
         tableDownload: "Download",
         tableLink: "Link",
+        officialIndexLabel: "Official sites",
         loading: "Loading data...",
         ready: "Data ready",
         loadError: "Could not load data",
@@ -71,6 +74,7 @@ window.MSD_I18N = {
         copyError: "Could not copy",
         emptyState: "No results match these filters",
         download: "Download",
+        officialSite: "Official site",
         copy: "Copy"
     }
 };
