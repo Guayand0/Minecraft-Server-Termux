@@ -264,7 +264,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((server) => {
                 return `
                     <a class="official-index-link" href="${escapeAttr(server.url)}" target="_blank" rel="noopener noreferrer">
-                        ${escapeHtml(server.name)}
+                        <span class="official-index-link-text">
+                            <span class="official-index-link-label">${escapeHtml(server.name)}</span>
+                            <span class="official-index-link-meta">${escapeHtml(t("officialSite"))}</span>
+                        </span>
+                        <span class="official-index-link-arrow" aria-hidden="true">↗</span>
                     </a>
                 `;
             })
