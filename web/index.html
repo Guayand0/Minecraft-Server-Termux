@@ -2,38 +2,86 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Catálogo de descargas de servidores Minecraft con filtros rápidos y enlaces directos.">
     <title>Minecraft Server Downloads</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="page-shell">
 
-    <h1>Minecraft Server Downloads</h1>
+        <main class="app-card">
+            <header class="hero">
+                <h1>Minecraft Server Downloads</h1>
+                <p class="hero-copy">Una interfaz más limpia y profesional para explorar builds, filtrar versiones y acceder a descargas directas.</p>
 
-    <div id="loading">Cargando datos...</div>
+                <div class="hero-stats" aria-label="Resumen">
+                    <div class="stat">
+                        <span class="stat-label">Estado</span>
+                        <strong id="loading">Cargando datos...</strong>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Resultados</span>
+                        <strong id="result-count">0</strong>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Fuente</span>
+                        <strong>API pública</strong>
+                    </div>
+                </div>
+            </header>
 
-    <div class="filters">
-        <select id="server">
-            <option value="">Todos los servidores</option>
-        </select>
+            <section class="panel filters-panel" aria-label="Filtros de búsqueda">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Explorar</p>
+                        <h2>Filtros rápidos</h2>
+                    </div>
+                </div>
 
-        <select id="version">
-            <option value="">Todas las versiones</option>
-        </select>
+                <div class="filters">
+                    <div class="field">
+                        <span>Servidor</span>
+                        <div id="server-filters" class="chip-group" aria-label="Servidores"></div>
+                    </div>
 
-        <button id="search">Buscar</button>
+                    <div class="field">
+                        <span>Versión</span>
+                        <div id="version-filters" class="chip-group" aria-label="Versiones"></div>
+                        <div id="subversion-wrap" class="subversion-wrap is-hidden" aria-live="polite">
+                            <span class="subversion-title">Subversión</span>
+                            <div id="version-subfilters" class="chip-group subversion-groups" aria-label="Subversiones"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel results-panel" aria-label="Tabla de resultados">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Builds</p>
+                        <h2>Descargas disponibles</h2>
+                    </div>
+                    <p class="panel-note">Ordenadas para una lectura rápida y clara.</p>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Servidor</th>
+                                <th>Versión</th>
+                                <th>Build</th>
+                                <th>Descarga</th>
+                                <th>ENLACE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Servidor</th>
-                <th>Versión</th>
-                <th>Build</th>
-                <th>Descarga</th>
-            </tr>
-        </thead>
-        <tbody id="results"></tbody>
-    </table>
 
     <script src="script.js"></script>
 </body>
