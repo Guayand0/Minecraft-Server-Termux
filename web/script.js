@@ -1,81 +1,73 @@
-const API_URL =
-    "https://minecraft-server-termux.vercel.app/api/server_versions";
+const API_URL = "https://minecraft-server-termux.vercel.app/api/server_versions";
 
-const serverSelect = document.getElementById("server");
-const versionSelect = document.getElementById("version");
-const results = document.getElementById("results");
+document.addEventListener("DOMContentLoaded", () => {
 
-async function loadData() {
-    const response = await fetch(API_URL);
-    const json = await response.json();
+    const serverSelect = document.getElementById("server");
+    const versionSelect = document.getElementById("version");
+    const results = document.getElementById("results");
+    const searchBtn = document.getElementById("search");
 
-    json.servers.forEach(server => {
-        const option = document.createElement("option");
-        option.value = server.name;
-        option.textContent = server.name;
-        serverSelect.appendChild(option);
-    });
+    async function loadData() {
+        const response = await fetch(API_URL);
+        const json = await response.json();
 
-    json.versions.forEach(version => {
-        const option = document.createElement("option");
-        option.value = version.version;
-        option.textContent = version.version;
-        versionSelect.appendChild(option);
-    });
+        console.log("API:", json);
 
-    renderRows(json.data);
-}
+        serverSelect.innerHTML = `<option value="">Todos los servidores</option>`;
+        versionSelect.innerHTML = `<option value="">Todas las versiones</option>`;
 
-function renderRows(data) {
-    results.innerHTML = "";
+        json.servers.forEach(server => {
+            const option = document.createElement("option");
+            option.value = server.name;
+            option.textContent = server.name;
+            serverSelect.appendChild(option);
+        });
 
-    if (!data.length) {
-        results.innerHTML = `
-            <tr>
-                <td colspan="4">No hay resultados</td>
-            </tr>
-        `;
-        return;
+        json.versions.forEach(version => {
+            const option = document.createElement("option");
+            option.value = version.version;
+            option.textContent = version.version;
+            versionSelect.appendChild(option);
+        });
+
+        renderRows(json.data);
     }
 
-    data.forEach(row => {
-        results.innerHTML += `
-            <tr>
-                <td>${row.name}</td>
-                <td>${row.version}</td>
-                <td>${row.build}</td>
-                <td>
-                    <a href="${row.url}" target="_blank">
-                        ${row.url}
-                    </a>
-                </td>
-            </tr>
-        `;
-    });
-}
+    function renderRows(data) {
+        results.innerHTML = "";
 
-async function search() {
-    const params = new URLSearchParams();
+        if (!data.length) {
+            results.innerHTML = `
+                <tr><td colspan="4">No hay resultados</td></tr>
+            `;
+            return;
+        }
 
-    if (serverSelect.value) {
-        params.append("server", serverSelect.value);
+        data.forEach(row => {
+            results.innerHTML += `
+                <tr>
+                    <td>${row.name}</td>
+                    <td>${row.version}</td>
+                    <td>${row.build}</td>
+                    <td><a href="${row.url}" target="_blank">Descargar</a></td>
+                </tr>
+            `;
+        });
     }
 
-    if (versionSelect.value) {
-        params.append("version", versionSelect.value);
+    async function search() {
+        const params = new URLSearchParams();
+
+        if (serverSelect.value) params.append("server", serverSelect.value);
+        if (versionSelect.value) params.append("version", versionSelect.value);
+
+        const response = await fetch(`${API_URL}?${params}`);
+        const json = await response.json();
+
+        renderRows(json.data);
     }
 
-    const response = await fetch(
-        `${API_URL}?${params.toString()}`
-    );
+    searchBtn.addEventListener("click", search);
 
-    const json = await response.json();
-
-    renderRows(json.data);
-}
-
-document
-    .getElementById("search")
-    .addEventListener("click", search);
-
-loadData();
+    loadData();
+});

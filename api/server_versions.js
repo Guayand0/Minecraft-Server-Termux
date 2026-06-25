@@ -1,6 +1,17 @@
 import mysql from "mysql2/promise";
 
 export default async function handler(req, res) {
+
+    // 🔴 CORS HEADERS
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    // 🔴 Preflight request (IMPORTANTE)
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
+
     const url = new URL(req.url, `https://${req.headers.host}`);
 
     const server = url.searchParams.get("server");
@@ -40,7 +51,7 @@ export default async function handler(req, res) {
 
     await connection.end();
 
-    res.status(200).json({
+    return res.status(200).json({
         servers,
         versions,
         data
