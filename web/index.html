@@ -41,12 +41,18 @@
 
                 <div class="filters">
                     <div class="field">
-                        <span>Servidor</span>
+                        <div class="field-header">
+                            <span>Servidor</span>
+                            <button class="clear-filter-button" type="button" data-clear-filter="server">Limpiar</button>
+                        </div>
                         <div id="server-filters" class="chip-group" aria-label="Servidores"></div>
                     </div>
 
                     <div class="field">
-                        <span>Versión</span>
+                        <div class="field-header">
+                            <span>Versión</span>
+                            <button class="clear-filter-button" type="button" data-clear-filter="version">Limpiar</button>
+                        </div>
                         <div id="version-filters" class="chip-group" aria-label="Versiones"></div>
                         <div id="subversion-wrap" class="subversion-wrap is-hidden" aria-live="polite">
                             <span class="subversion-title">Subversión</span>
@@ -62,7 +68,11 @@
                         <p class="panel-kicker">Builds</p>
                         <h2>Descargas disponibles</h2>
                     </div>
-                    <p class="panel-note">Ordenadas para una lectura rápida y clara.</p>
+                    <div class="sort-control" aria-label="Ordenar versiones">
+                        <span>Orden</span>
+                        <button class="sort-button is-active" type="button" data-sort="desc" aria-pressed="true">Mayor a menor</button>
+                        <button class="sort-button" type="button" data-sort="asc" aria-pressed="false">Menor a mayor</button>
+                    </div>
                 </div>
 
                 <div class="table-wrap">

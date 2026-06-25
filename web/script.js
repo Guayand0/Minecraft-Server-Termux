@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const subversionWrap = document.getElementById("subversion-wrap");
     const subversionFilters = document.getElementById("version-subfilters");
     const results = document.getElementById("results");
+    const sortButtons = document.querySelectorAll("[data-sort]");
+    const clearFilterButtons = document.querySelectorAll("[data-clear-filter]");
     const loading = document.getElementById("loading");
     const resultCount = document.getElementById("result-count");
 
@@ -13,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let serverNames = [];
     let versionMap = new Map();
     let majorVersions = [];
+    let sortOrder = "desc";
     const selectedServers = new Set();
     const selectedMajors = new Set();
     const selectedSubversions = new Map();
@@ -203,11 +206,31 @@ document.addEventListener("DOMContentLoaded", () => {
             return serverMatch && selectedForMajor.has(row.version);
         });
 
-        renderRows(filtered);
+        renderRows(sortRows(filtered));
         syncChipState(serverFilters, selectedServers);
         syncChipState(versionFilters, selectedMajors);
         syncSubversionState();
         renderSubversionGroups();
+    }
+
+    function sortRows(rows) {
+        return rows.slice().sort((a, b) => {
+            const versionResult = compareVersions(a.version, b.version);
+
+            if (versionResult !== 0) {
+                return sortOrder === "desc" ? -versionResult : versionResult;
+            }
+
+            return String(a.name).localeCompare(String(b.name));
+        });
+    }
+
+    function syncSortButtons() {
+        sortButtons.forEach((button) => {
+            const isActive = button.dataset.sort === sortOrder;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+        });
     }
 
     function syncChipState(container, selectedSet) {
@@ -342,9 +365,40 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFilters();
     }
 
+    function onSortClick(event) {
+        const button = event.target.closest("[data-sort]");
+        if (!button) return;
+
+        sortOrder = button.dataset.sort;
+        syncSortButtons();
+        applyFilters();
+    }
+
+    function onClearFilterClick(event) {
+        const button = event.target.closest("[data-clear-filter]");
+        if (!button) return;
+
+        if (button.dataset.clearFilter === "server") {
+            selectedServers.clear();
+        }
+
+        if (button.dataset.clearFilter === "version") {
+            selectedMajors.clear();
+            selectedSubversions.clear();
+        }
+
+        applyFilters();
+    }
+
     serverFilters.addEventListener("click", onServerChipClick);
     versionFilters.addEventListener("click", onMajorChipClick);
     subversionFilters.addEventListener("click", onSubversionChipClick);
+    sortButtons.forEach((button) => {
+        button.addEventListener("click", onSortClick);
+    });
+    clearFilterButtons.forEach((button) => {
+        button.addEventListener("click", onClearFilterClick);
+    });
 
     results.addEventListener("click", (event) => {
         const button = event.target.closest("[data-copy-url]");
@@ -352,5 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
         copyUrl(button.dataset.copyUrl);
     });
 
+    syncSortButtons();
     loadData();
 });

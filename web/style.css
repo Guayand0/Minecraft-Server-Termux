@@ -147,6 +147,46 @@ body {
     font-size: 0.95rem;
 }
 
+.sort-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid rgba(167, 195, 224, 0.14);
+    border-radius: 999px;
+    background: rgba(8, 15, 25, 0.72);
+}
+
+.sort-control span {
+    padding: 0 8px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sort-button {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--text);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.sort-button:hover {
+    border-color: rgba(121, 182, 255, 0.32);
+    background: rgba(121, 182, 255, 0.08);
+}
+
+.sort-button.is-active {
+    color: #04121b;
+    background: #79b6ff;
+    font-weight: 700;
+}
+
 .filters {
     display: grid;
     grid-template-columns: 1fr;
@@ -158,8 +198,34 @@ body {
     gap: 9px;
 }
 
-.field span {
+.field span,
+.field-header span {
     font-size: 0.9rem;
+}
+
+.field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.clear-filter-button {
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgba(167, 195, 224, 0.16);
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+.clear-filter-button:hover {
+    color: var(--text);
+    border-color: rgba(121, 182, 255, 0.34);
+    background: rgba(121, 182, 255, 0.08);
 }
 
 button {
@@ -461,6 +527,12 @@ a:hover {
 
     .panel-note {
         text-align: left;
+    }
+
+    .sort-control {
+        align-items: stretch;
+        flex-wrap: wrap;
+        border-radius: 18px;
     }
 
     .primary-button {
