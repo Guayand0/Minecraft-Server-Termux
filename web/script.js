@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const officialIndexLinks = document.getElementById("official-index-links");
     const results = document.getElementById("results");
     const sortButtons = document.querySelectorAll("[data-sort]");
+    const serverSortButtons = document.querySelectorAll("[data-server-sort]");
     const clearFilterButtons = document.querySelectorAll("[data-clear-filter]");
     const loading = document.getElementById("loading");
     const resultCount = document.getElementById("result-count");
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let versionMap = new Map();
     let majorVersions = [];
     let sortOrder = "desc";
+    let sortByServer = false;
     let currentLanguage = getInitialLanguage();
     let currentStatusKey = "loading";
     let currentToastKey = "";
@@ -102,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyStaticTranslations();
         renderOfficialIndex();
         syncSortButtons();
+        syncServerSortButtons();
         syncChipState(serverFilters, selectedServers);
         syncChipState(versionFilters, selectedMajors);
         syncSubversionState();
@@ -396,6 +399,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function sortRows(rows) {
         return rows.slice().sort((a, b) => {
+            if (sortByServer && hasActiveFilters()) {
+                const serverResult = String(a.name).localeCompare(String(b.name));
+
+                if (serverResult !== 0) {
+                    return serverResult;
+                }
+            }
+
             const versionResult = compareVersions(a.version, b.version);
 
             if (versionResult !== 0) {
@@ -406,9 +417,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function hasActiveFilters() {
+        return selectedServers.size > 0 || selectedMajors.size > 0;
+    }
+
     function syncSortButtons() {
         sortButtons.forEach((button) => {
             const isActive = button.dataset.sort === sortOrder;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+        });
+    }
+
+    function syncServerSortButtons() {
+        serverSortButtons.forEach((button) => {
+            const isActive = button.dataset.serverSort === String(sortByServer);
             button.classList.toggle("is-active", isActive);
             button.setAttribute("aria-pressed", String(isActive));
         });
@@ -551,6 +574,15 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFilters();
     }
 
+    function onServerSortClick(event) {
+        const button = event.target.closest("[data-server-sort]");
+        if (!button) return;
+
+        sortByServer = button.dataset.serverSort === "true";
+        syncServerSortButtons();
+        applyFilters();
+    }
+
     function onClearFilterClick(event) {
         const button = event.target.closest("[data-clear-filter]");
         if (!button) return;
@@ -576,6 +608,9 @@ document.addEventListener("DOMContentLoaded", () => {
     subversionFilters.addEventListener("click", onSubversionChipClick);
     sortButtons.forEach((button) => {
         button.addEventListener("click", onSortClick);
+    });
+    serverSortButtons.forEach((button) => {
+        button.addEventListener("click", onServerSortClick);
     });
     clearFilterButtons.forEach((button) => {
         button.addEventListener("click", onClearFilterClick);

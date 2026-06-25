@@ -90,10 +90,17 @@
                         <p class="panel-kicker" data-i18n="buildsKicker">Builds</p>
                         <h2 data-i18n="downloadsTitle">Descargas disponibles</h2>
                     </div>
-                    <div class="sort-control" aria-label="Ordenar versiones">
-                        <span data-i18n="orderLabel">Orden versiones</span>
-                        <button class="sort-button is-active" type="button" data-sort="desc" aria-pressed="true" data-i18n="orderDesc">Mayor a menor</button>
-                        <button class="sort-button" type="button" data-sort="asc" aria-pressed="false" data-i18n="orderAsc">Menor a mayor</button>
+                    <div class="sort-controls">
+                        <div class="sort-control" aria-label="Ordenar versiones">
+                            <span data-i18n="orderLabel">Orden versiones</span>
+                            <button class="sort-button is-active" type="button" data-sort="desc" aria-pressed="true" data-i18n="orderDesc">Mayor a menor</button>
+                            <button class="sort-button" type="button" data-sort="asc" aria-pressed="false" data-i18n="orderAsc">Menor a mayor</button>
+                        </div>
+                        <div class="sort-control server-sort-control" aria-label="Ordenar por servidor">
+                            <span data-i18n="serverOrderLabel">Orden por servidor</span>
+                            <button class="sort-button" type="button" data-server-sort="true" aria-pressed="false" data-i18n="yes">Sí</button>
+                            <button class="sort-button is-active" type="button" data-server-sort="false" aria-pressed="true" data-i18n="no">No</button>
+                        </div>
                     </div>
                 </div>
 
