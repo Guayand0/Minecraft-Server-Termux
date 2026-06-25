@@ -1,4 +1,6 @@
-const API_URL = "https://minecraft-server-termux.vercel.app/api/server_versions";
+const API_URL = getApiUrl();
+const STORAGE_KEY = "minecraft-server-termux-language";
+const DEFAULT_LANGUAGE = "es";
 
 document.addEventListener("DOMContentLoaded", () => {
     const serverFilters = document.getElementById("server-filters");
@@ -10,50 +12,170 @@ document.addEventListener("DOMContentLoaded", () => {
     const clearFilterButtons = document.querySelectorAll("[data-clear-filter]");
     const loading = document.getElementById("loading");
     const resultCount = document.getElementById("result-count");
+    const languageSelect = document.getElementById("language-select");
+    const toast = document.getElementById("toast");
+    const metaDescription = document.querySelector('meta[name="description"]');
 
     let cachedData = [];
     let serverNames = [];
     let versionMap = new Map();
     let majorVersions = [];
     let sortOrder = "desc";
+    let currentLanguage = getInitialLanguage();
+    let currentStatusKey = "loading";
+    let currentToastKey = "";
+    let toastTimer = null;
+
     const selectedServers = new Set();
     const selectedMajors = new Set();
     const selectedSubversions = new Map();
 
+    function t(key) {
+        return window.MSD_I18N?.[currentLanguage]?.[key]
+            ?? window.MSD_I18N?.[DEFAULT_LANGUAGE]?.[key]
+            ?? key;
+    }
+
+    function getApiUrl() {
+        if (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null") {
+            return `${window.location.origin}/api/server_versions`;
+        }
+
+        return "https://minecraft-server-termux.vercel.app/api/server_versions";
+    }
+
+    function getInitialLanguage() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === "es" || saved === "en") {
+                return saved;
+            }
+        } catch (err) {
+            // Ignore storage failures and fall back to browser language.
+        }
+
+        const browserLanguage = (navigator.language || navigator.userLanguage || DEFAULT_LANGUAGE).toLowerCase();
+        return browserLanguage.startsWith("en") ? "en" : DEFAULT_LANGUAGE;
+    }
+
+    function saveLanguage(language) {
+        try {
+            localStorage.setItem(STORAGE_KEY, language);
+        } catch (err) {
+            // Storage is optional; the app still works without it.
+        }
+    }
+
+    function setLanguage(language, shouldPersist = true) {
+        if (language !== "es" && language !== "en") {
+            language = DEFAULT_LANGUAGE;
+        }
+
+        currentLanguage = language;
+
+        if (shouldPersist) {
+            saveLanguage(language);
+        }
+
+        document.documentElement.lang = language;
+
+        if (languageSelect) {
+            languageSelect.value = language;
+        }
+
+        applyStaticTranslations();
+        syncSortButtons();
+        syncChipState(serverFilters, selectedServers);
+        syncChipState(versionFilters, selectedMajors);
+        syncSubversionState();
+
+        if (currentToastKey) {
+            showToast(currentToastKey);
+        }
+    }
+
+    function applyStaticTranslations() {
+        document.title = t("appName");
+
+        if (metaDescription) {
+            metaDescription.setAttribute("content", t("metaDescription"));
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+            const key = element.dataset.i18n;
+            if (key) {
+                element.textContent = t(key);
+            }
+        });
+
+        loading.textContent = t(currentStatusKey);
+    }
+
+    function setStatus(key, isLoading) {
+        currentStatusKey = key;
+        loading.textContent = t(key);
+        loading.classList.toggle("is-idle", !isLoading);
+    }
+
+    function showToast(key, autoHide = true) {
+        currentToastKey = key;
+        toast.textContent = t(key);
+        toast.classList.add("is-visible");
+        toast.dataset.kind = key === "copyError" ? "error" : "info";
+
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+        }
+
+        if (autoHide) {
+            toastTimer = setTimeout(() => {
+                toast.classList.remove("is-visible");
+                currentToastKey = "";
+            }, 1800);
+        }
+    }
+
     async function loadData() {
-        setLoadingState(true, "Cargando datos...");
+        setStatus("loading", true);
+
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 15000);
 
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                signal: controller.signal,
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API responded with ${response.status}`);
+            }
+
             const json = await response.json();
 
             cachedData = Array.isArray(json.data) ? json.data : [];
             serverNames = Array.isArray(json.servers)
                 ? json.servers
                     .slice()
-                    .sort((a, b) => a.id - b.id)
-                    .map((server) => server.name)
+                    .sort((a, b) => Number(a.id ?? 0) - Number(b.id ?? 0))
+                    .map((server) => String(server.name))
                 : [];
 
             buildVersionIndex(Array.isArray(json.versions) ? json.versions : []);
             renderFilterButtons();
             applyFilters();
-            setLoadingState(false, "Datos listos");
+            setStatus("ready", false);
         } catch (err) {
             console.error("Error API:", err);
             renderFilterButtons();
             renderRows([]);
-            setLoadingState(false, "No se pudo cargar");
+            setStatus("loadError", false);
+            showToast("loadError");
+        } finally {
+            window.clearTimeout(timeout);
         }
-    }
-
-    function setLoadingState(isLoading, label) {
-        loading.textContent = label;
-        loading.classList.toggle("is-idle", !isLoading);
-
-        document.querySelectorAll(".filter-chip").forEach((button) => {
-            button.disabled = isLoading;
-        });
     }
 
     function buildVersionIndex(versions) {
@@ -63,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .slice()
             .sort((a, b) => compareVersions(a.version, b.version))
             .forEach((entry) => {
-                const version = entry.version;
+                const version = String(entry.version);
                 const major = getMajorVersion(version);
 
                 if (!versionMap.has(major)) {
@@ -109,6 +231,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const versions = versionMap.get(major) || [];
             const selectedForMajor = selectedSubversions.get(major) || new Set();
 
+            if (!versions.length) {
+                return;
+            }
+
             const group = document.createElement("div");
             group.className = "subversion-group";
 
@@ -124,11 +250,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 chips.appendChild(createChip(version, version, selectedForMajor.has(version), false));
             });
 
-            if (versions.length) {
-                hasVisibleSubversions = true;
-                group.appendChild(chips);
-                subversionFilters.appendChild(group);
-            }
+            group.appendChild(chips);
+            subversionFilters.appendChild(group);
+            hasVisibleSubversions = true;
         });
 
         subversionWrap.classList.toggle("is-hidden", !hasVisibleSubversions);
@@ -162,15 +286,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function compareVersions(a, b) {
-        const pa = String(a).split(".").map(Number);
-        const pb = String(b).split(".").map(Number);
+        const pa = String(a).split(".").map((part) => Number.parseInt(part, 10) || 0);
+        const pb = String(b).split(".").map((part) => Number.parseInt(part, 10) || 0);
         const len = Math.max(pa.length, pb.length);
 
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < len; i += 1) {
             const na = pa[i] ?? 0;
             const nb = pb[i] ?? 0;
 
-            if (na !== nb) return na - nb;
+            if (na !== nb) {
+                return na - nb;
+            }
         }
 
         return 0;
@@ -187,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyFilters() {
         const filtered = cachedData.filter((row) => {
-            const serverMatch = selectedServers.size === 0 || selectedServers.has(row.name);
+            const serverMatch = selectedServers.size === 0 || selectedServers.has(String(row.name));
 
             if (!selectedMajors.size) {
                 return serverMatch;
@@ -203,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return serverMatch;
             }
 
-            return serverMatch && selectedForMajor.has(row.version);
+            return serverMatch && selectedForMajor.has(String(row.version));
         });
 
         renderRows(sortRows(filtered));
@@ -234,6 +360,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncChipState(container, selectedSet) {
+        if (!container) {
+            return;
+        }
+
         container.querySelectorAll(".filter-chip").forEach((button) => {
             const value = button.dataset.value;
             const isActive = selectedSet.has(value);
@@ -259,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!data.length) {
             results.innerHTML = `
                 <tr class="empty-row">
-                    <td colspan="5">No hay resultados para estos filtros</td>
+                    <td colspan="5">${escapeHtml(t("emptyState"))}</td>
                 </tr>
             `;
             return;
@@ -271,10 +401,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${escapeHtml(row.version)}</td>
                 <td><span class="build-pill ${getBuildClass(row.build)}">${escapeHtml(String(row.build))}</span></td>
                 <td>
-                    <a class="download-button" href="${escapeAttr(row.url)}" target="_blank" rel="noopener noreferrer">Descargar</a>
+                    <a class="download-button" href="${escapeAttr(row.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("download"))}</a>
                 </td>
                 <td>
-                    <button class="copy-button" type="button" data-copy-url="${escapeAttr(row.url)}">Copiar</button>
+                    <button class="copy-button" type="button" data-copy-url="${escapeAttr(row.url)}">${escapeHtml(t("copy"))}</button>
                 </td>
             </tr>
         `).join("");
@@ -307,18 +437,10 @@ document.addEventListener("DOMContentLoaded", () => {
     async function copyUrl(url) {
         try {
             await navigator.clipboard.writeText(url);
-            const previousStatus = loading.textContent;
-            loading.textContent = "URL copiada";
-            setTimeout(() => {
-                loading.textContent = previousStatus;
-            }, 1200);
+            showToast("copySuccess");
         } catch (err) {
             console.error("Error copiando:", err);
-            const previousStatus = loading.textContent;
-            loading.textContent = "No se pudo copiar";
-            setTimeout(() => {
-                loading.textContent = previousStatus;
-            }, 1200);
+            showToast("copyError");
         }
     }
 
@@ -390,6 +512,10 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFilters();
     }
 
+    function onLanguageChange(event) {
+        setLanguage(event.target.value);
+    }
+
     serverFilters.addEventListener("click", onServerChipClick);
     versionFilters.addEventListener("click", onMajorChipClick);
     subversionFilters.addEventListener("click", onSubversionChipClick);
@@ -399,6 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearFilterButtons.forEach((button) => {
         button.addEventListener("click", onClearFilterClick);
     });
+    languageSelect.addEventListener("change", onLanguageChange);
 
     results.addEventListener("click", (event) => {
         const button = event.target.closest("[data-copy-url]");
@@ -406,6 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
         copyUrl(button.dataset.copyUrl);
     });
 
+    setLanguage(currentLanguage, false);
     syncSortButtons();
     loadData();
 });
