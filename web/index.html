@@ -54,6 +54,32 @@
                 </div>
             </header>
 
+            <section class="requirements" aria-label="Comandos listos para pegar">
+                <article class="step-card" data-requirement-card tabindex="0" aria-expanded="false">
+                    <h3>Requisitos</h3>
+                    <p>Conexión a internet</p>
+                    <p>+ 4GB de almacenamiento</p>
+                    <p>+ 2GB de RAM</p>
+                    <p>
+                        Descargar Termux desde <a class="download-link" href="https://f-droid.org/es/packages/com.termux/" target="_blank" rel="noopener noreferrer">f-droid</a>,
+                        <a class="download-link" href="https://play.google.com/store/apps/details?id=com.termux" target="_blank" rel="noopener noreferrer">Google Play</a> o
+                        <a class="download-link" href="https://github.com/termux/termux-app" target="_blank" rel="noopener noreferrer">Github</a>
+                    </p>
+                </article>
+
+                <article class="step-card" data-requirement-card tabindex="0" aria-expanded="false">
+                    <h3>Información importante</h3>
+                    <p class="information-chip">
+                        El rendimiento de un servidor de Minecraft en un móvil es limitado. Este proyecto está diseñado para realizar pruebas
+                        o jugar con un número muy reducido de personas, de 1 a 3 jugadores, ya que el hardware de un dispositivo móvil no ofrece el mismo
+                        rendimiento que un PC o un servidor dedicado y puede tener problemas de lag.
+                    </p>
+                    <p class="information-chip">
+                        En rendimiento, un servidor en Termux se compara aproximandamente con un servidor de Aternos, pero con diferentes limitaciones.
+                    </p>
+                </article>
+            </section>
+
             <section class="steps" aria-label="Pasos a seguir">
                 <article class="step-card">
                     <span class="step-number">1</span>
@@ -61,7 +87,8 @@
                     <p>
                         Pega el primer comando. Este paso actualiza el sistema e instala Debian.
                     </p>
-                    <a class="step-link" href="#command-1">Ir al comando 1</a>
+                    <p>Tiempo estimado: 5 minutos</p>
+                    <a class="step-link" href="#command-1">Comando 1</a>
                 </article>
 
                 <article class="step-card">
@@ -87,12 +114,13 @@
                     <p>
                         Pega el segundo comando. Este paso actualiza Debian, instala Java y descarga el servidor de Minecraft.
                     </p>
-                    <a class="step-link" href="#command-2">Ir al comando 2</a>
+                    <p>Tiempo estimado: 10 minutos</p>
+                    <a class="step-link" href="#command-2">Comando 2</a>
                 </article>
 
                 <article class="step-card">
                     <span class="step-number">5</span>
-                    <h3>Instala el servidor de Minecraft</h3>
+                    <h3>Inicia el servidor de Minecraft</h3>
                     <p>
                         Al terminar de instalar, inicia el servidor de Minecraft usando <code>./1_start.sh</code> desde la terminal.
                     </p>

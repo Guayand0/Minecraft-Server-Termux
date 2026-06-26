@@ -30,6 +30,8 @@
             const errorModalClose = document.getElementById("error-modal-close");
             const errorModalRetry = document.getElementById("error-modal-retry");
             const copyButtons = document.querySelectorAll("[data-copy-target]");
+            const requirementCards = document.querySelectorAll("[data-requirement-card]");
+            const requirementsSection = document.querySelector(".requirements");
             const dropdowns = [serverDropdown, versionDropdown];
 
             const state = {
@@ -282,6 +284,27 @@
                 }
             }
 
+            function isInteractiveElement(element) {
+                return Boolean(element?.closest("a, button, input, select, textarea, label"));
+            }
+
+            function setRequirementCardExpanded(card, expanded) {
+                if (!card) {
+                    return;
+                }
+
+                card.classList.toggle("is-open", expanded);
+                card.setAttribute("aria-expanded", String(expanded));
+            }
+
+            function toggleRequirementCard(card) {
+                if (!card) {
+                    return;
+                }
+
+                setRequirementCardExpanded(card, !card.classList.contains("is-open"));
+            }
+
             function openDropdown(dropdown) {
                 if (!dropdown) {
                     return;
@@ -381,6 +404,31 @@
 
                     await copyText(target.textContent.trim());
                 });
+            });
+
+            requirementCards.forEach((card) => {
+                setRequirementCardExpanded(card, false);
+            });
+
+            requirementsSection?.addEventListener("click", (event) => {
+                const card = event.target.closest("[data-requirement-card]");
+                if (!card || isInteractiveElement(event.target)) {
+                    return;
+                }
+
+                toggleRequirementCard(card);
+            });
+
+            requirementsSection?.addEventListener("keydown", (event) => {
+                const card = event.target.closest("[data-requirement-card]");
+                if (!card || isInteractiveElement(event.target)) {
+                    return;
+                }
+
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleRequirementCard(card);
+                }
             });
 
             serverSelect.addEventListener("click", () => toggleDropdown(serverDropdown));

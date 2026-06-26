@@ -10,9 +10,9 @@ apt install -y openjdk-25-jdk
 MC_URL="$1"
 
 if [ -z "$MC_URL" ]; then
-  echo "Uso: $0 <URL_server.jar>"
+  echo "Uso: $0 -s <URL_server.jar>"
   echo "Ejemplo:"
-  echo "$0 https://api.leafmc.one/v2/projects/leaf/versions/1.21.11/builds/168/downloads/leaf-1.21.11-168.jar"
+  echo "$0 -s https://api.purpurmc.org/v2/purpur/26.2/2603/download"
   exit 1
 fi
 

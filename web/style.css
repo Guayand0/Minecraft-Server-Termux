@@ -431,6 +431,15 @@
             color: #8eeeff;
         }
 
+        .download-link {
+            font-family: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            color: #1fa5ff;
+        }
+
+        .download-link:hover {
+            color: #88cfff;
+        }
+
         .status-row {
             display: flex;
             flex-wrap: nowrap;
@@ -495,6 +504,61 @@
             border-radius: 999px;
             background: linear-gradient(180deg, var(--accent-3), var(--accent));
             box-shadow: 0 0 0 4px rgba(255, 177, 95, 0.14);
+        }
+
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            padding: 0 34px 34px;
+            border-bottom: 1px solid rgba(180, 205, 255, 0.12);
+        }
+
+        .requirements .step-card {
+            cursor: pointer;
+            transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+        }
+
+        .requirements .step-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(102, 227, 255, 0.28);
+        }
+
+        .requirements .step-card::after {
+            content: "▾";
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            color: rgba(238, 244, 255, 0.72);
+            font-size: 1rem;
+            line-height: 1;
+            transition: transform 140ms ease, color 140ms ease;
+        }
+
+        .requirements .step-card.is-open::after {
+            transform: rotate(180deg);
+            color: rgba(102, 227, 255, 0.9);
+        }
+
+        .requirements .step-card:not(.is-open) p {
+            display: none;
+        }
+
+        .information-chip {
+            padding: 16px;
+            border: 1px solid rgba(165, 194, 224, 0.16);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .information-chip p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .information-chip + .information-chip {
+            margin-top: 12px;
         }
 
         .steps {
