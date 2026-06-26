@@ -144,7 +144,7 @@
                                 <strong>Comando 1: instalar Debian en Termux</strong>
                                 <span>Este comando prepara el entorno base donde luego vivira el servidor.</span>
                             </div>
-                            <button class="copy-button" type="button" data-copy-target="debian-command">Copiar comando</button>
+                            <button class="copy-button" type="button" data-copy-target="debian-command">Copiar</button>
                         </div>
                         <div class="code-shell">
                             <pre><code id="debian-command">curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/1_install-Debian.sh | bash</code></pre>
@@ -157,12 +157,10 @@
                                 <strong>Comando 2: descargar el servidor elegido</strong>
                                 <span>La URL cambia segun el tipo de servidor y la version seleccionados arriba.</span>
                             </div>
-                            <button class="copy-button" type="button" data-copy-target="install-command">Copiar comando</button>
+                            <button class="copy-button" type="button" data-copy-target="install-command">Copiar</button>
                         </div>
                         <div class="code-shell">
                             <pre><code id="install-command">curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/2_install-MC.sh | bash -s "&lt;URL_VERSION&gt;"</code></pre>
-                            <!-- <pre><code id="install-command">bash &lt;(curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/2_install-MC.sh) "&lt;URL_VERSION&gt;"</code></pre> -->
-                            
                         </div>
                         <div class="status-row">
                             <span id="selection-summary" class="status-pill"><span class="status-dot"></span>Cargando opciones...</span>
@@ -262,7 +260,7 @@
                 </article>
 
                 <article class="step-card">
-                    <h3>Servidor de Minecraft</h3>
+                    <h3>Servidor</h3>
 <!-- ------------------------------------------ -->
                     <p class="information">
                         - Para iniciar el servidor usa <code>./start.sh</code> dentro de la carpeta del servidor.
@@ -273,16 +271,15 @@
                     </p>
 <!-- ------------------------------------------ -->
                     <p class="information">
-                        - Para reiniciar el servidor usa <code>restart</code> en la terminal mientras el servidor este corriendo.
+                        - Para cambiar la cantidad de RAM usada por el servidor modifica el archivo <code>start.sh</code> y cambia el valor de <code>RAM</code>.
                     </p>
 <!-- ------------------------------------------ -->
                     <p class="information">
-                        - Para cambiar la cantidad de RAM usada por el servidor modifica el archivo <code>start.sh</code> y cambia el valor de <code>RAM</code>.
+                        - Para cambiar la configuracion del servidor modifica el archivo <code>server.properties</code>
                     </p>
 <!-- ------------------------------------------ -->
                 </article>
             </section>
-
 
         </section>
     </main>
@@ -291,9 +288,9 @@
     <div id="error-modal" class="modal-overlay is-hidden" role="presentation">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="error-modal-title">
             <h2 id="error-modal-title">Error al cargar los datos</h2>
-            <p id="error-modal-message">
-                No se pudo cargar la lista de servidores y versiones desde la API.
-            </p>
+            <p>No se pudo cargar la lista de servidores y versiones.</p>
+            <p>Espera unos minutos y vuelve a intentarlo.</p>
+            <p>Para seguir leyendo la guia pulsa <code>Cerrar</code>.</p>
             <div class="modal-actions">
                 <button id="error-modal-retry" class="modal-button modal-button-primary" type="button">Reintentar</button>
                 <button id="error-modal-close" class="modal-button" type="button">Cerrar</button>

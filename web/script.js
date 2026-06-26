@@ -179,7 +179,7 @@
                 syncServerSelect();
                 syncVersionSelect();
                 updateCommandPreview();
-                showErrorModal("No se pudo cargar la lista de servidores y versiones. Comprueba tu conexion e intenta de nuevo.");
+                showErrorModal("Error al cargar los datos. Intenta de nuevo mas tarde.");
             }
 
             function initializeSelectors() {
