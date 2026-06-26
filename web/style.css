@@ -384,6 +384,22 @@
             transform: translateY(0);
         }
 
+        .copy-button.is-disabled,
+        .copy-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            filter: grayscale(0.2);
+            box-shadow: none;
+        }
+
+        .copy-button.is-disabled:hover,
+        .copy-button:disabled:hover,
+        .copy-button.is-disabled:active,
+        .copy-button:disabled:active {
+            transform: none;
+            filter: grayscale(0.2);
+        }
+
         .code-shell {
             width: 100%;
             min-width: 0;

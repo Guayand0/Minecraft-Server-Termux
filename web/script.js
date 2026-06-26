@@ -22,6 +22,7 @@
             const versionOptions = document.getElementById("version-options");
             const debianCommand = document.getElementById("debian-command");
             const installCommand = document.getElementById("install-command");
+            const installCopyButton = document.getElementById("install-copy-button");
             const selectionSummary = document.getElementById("selection-summary");
             const urlPreview = document.getElementById("url-preview");
             const toast = document.getElementById("toast");
@@ -40,6 +41,7 @@
                 versions: [],
                 selectedServer: "",
                 selectedVersion: "",
+                dataReady: false,
                 toastTimer: null,
                 activeDropdown: null
             };
@@ -90,6 +92,19 @@
                 state.toastTimer = window.setTimeout(() => {
                     toast.classList.remove("is-visible");
                 }, 1700);
+            }
+
+            function setInstallCopyState(isEnabled) {
+                if (!installCopyButton) {
+                    return;
+                }
+
+                const disabledMessage = "No se puede copiar hasta que carguen los datos de servidores y versiones.";
+
+                state.dataReady = isEnabled;
+                installCopyButton.classList.toggle("is-disabled", !isEnabled);
+                installCopyButton.setAttribute("aria-disabled", String(!isEnabled));
+                installCopyButton.title = isEnabled ? "Copiar el comando 2" : disabledMessage;
             }
 
             async function copyText(text) {
@@ -162,6 +177,7 @@
                         }
 
                         initializeSelectors();
+                        setInstallCopyState(true);
                         return;
                     } catch (error) {
                         lastError = error;
@@ -174,6 +190,7 @@
                 state.versions = [];
                 state.selectedServer = "";
                 state.selectedVersion = "";
+                setInstallCopyState(false);
                 renderServerOptions([]);
                 renderVersionOptions([]);
                 syncServerSelect();
@@ -396,6 +413,11 @@
 
             copyButtons.forEach((button) => {
                 button.addEventListener("click", async () => {
+                    if (button === installCopyButton && !state.dataReady) {
+                        showToast("No se puede copiar hasta que carguen los datos de servidores y versiones.");
+                        return;
+                    }
+
                     const targetId = button.dataset.copyTarget;
                     const target = document.getElementById(targetId);
                     if (!target) {
@@ -479,5 +501,6 @@
 
             debianCommand.textContent = DEBIAN_COMMAND;
             installCommand.textContent = DEFAULT_INSTALL_COMMAND;
+            setInstallCopyState(false);
             loadData();
         })();
