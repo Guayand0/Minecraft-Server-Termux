@@ -1,633 +1,435 @@
-const STORAGE_KEY = "minecraft-server-termux-language";
-const DEFAULT_LANGUAGE = "es";
+(() => {
+            const ROOT_COMMAND = "curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/";
+            const DEBIAN_COMMAND = `${ROOT_COMMAND}1_install-Debian.sh | bash`;
+            const INSTALL_COMMAND_BASE = `${ROOT_COMMAND}2_install-MC.sh | bash -s `;
+            const DEFAULT_INSTALL_COMMAND = `${INSTALL_COMMAND_BASE}"<URL_VERSION>"`;
+            const API_URLS = [
+                window.MSD_API_URL,
+                "https://minecraft-server-termux.vercel.app/api/server_versions",
+                window.location && window.location.origin && window.location.origin !== "null"
+                    ? `${window.location.origin}/api/server_versions`
+                    : "",
+                "./api/server_versions"
+            ].filter((value, index, array) => typeof value === "string" && value && array.indexOf(value) === index);
 
-document.addEventListener("DOMContentLoaded", () => {
-    const serverFilters = document.getElementById("server-filters");
-    const versionFilters = document.getElementById("version-filters");
-    const subversionWrap = document.getElementById("subversion-wrap");
-    const subversionFilters = document.getElementById("version-subfilters");
-    const officialIndexLinks = document.getElementById("official-index-links");
-    const results = document.getElementById("results");
-    const sortButtons = document.querySelectorAll("[data-sort]");
-    const serverSortButtons = document.querySelectorAll("[data-server-sort]");
-    const clearFilterButtons = document.querySelectorAll("[data-clear-filter]");
-    const loading = document.getElementById("loading");
-    const resultCount = document.getElementById("result-count");
-    const languageSelect = document.getElementById("language-select");
-    const toast = document.getElementById("toast");
-    const metaDescription = document.querySelector('meta[name="description"]');
+            const serverDropdown = document.getElementById("server-dropdown");
+            const versionDropdown = document.getElementById("version-dropdown");
+            const serverSelect = document.getElementById("server-select");
+            const versionSelect = document.getElementById("version-select");
+            const serverSelectLabel = document.getElementById("server-select-label");
+            const versionSelectLabel = document.getElementById("version-select-label");
+            const serverOptions = document.getElementById("server-options");
+            const versionOptions = document.getElementById("version-options");
+            const debianCommand = document.getElementById("debian-command");
+            const installCommand = document.getElementById("install-command");
+            const selectionSummary = document.getElementById("selection-summary");
+            const urlPreview = document.getElementById("url-preview");
+            const toast = document.getElementById("toast");
+            const errorModal = document.getElementById("error-modal");
+            const errorModalMessage = document.getElementById("error-modal-message");
+            const errorModalClose = document.getElementById("error-modal-close");
+            const errorModalRetry = document.getElementById("error-modal-retry");
+            const copyButtons = document.querySelectorAll("[data-copy-target]");
+            const dropdowns = [serverDropdown, versionDropdown];
 
-    let cachedData = [];
-    let serverEntries = [];
-    let serverNames = [];
-    let versionMap = new Map();
-    let majorVersions = [];
-    let sortOrder = "desc";
-    let sortByServer = false;
-    let currentLanguage = getInitialLanguage();
-    let currentStatusKey = "loading";
-    let currentToastKey = "";
-    let toastTimer = null;
-    const apiUrls = getApiUrls();
+            const state = {
+                rows: [],
+                servers: [],
+                versions: [],
+                selectedServer: "",
+                selectedVersion: "",
+                toastTimer: null,
+                activeDropdown: null
+            };
 
-    const selectedServers = new Set();
-    const selectedMajors = new Set();
-    const selectedSubversions = new Map();
+            function compareVersionsDesc(a, b) {
+                const pa = String(a).split(".").map((part) => Number.parseInt(part, 10) || 0);
+                const pb = String(b).split(".").map((part) => Number.parseInt(part, 10) || 0);
+                const len = Math.max(pa.length, pb.length);
 
-    function t(key) {
-        return window.MSD_I18N?.[currentLanguage]?.[key]
-            ?? window.MSD_I18N?.[DEFAULT_LANGUAGE]?.[key]
-            ?? key;
-    }
+                for (let i = 0; i < len; i += 1) {
+                    const na = pa[i] ?? 0;
+                    const nb = pb[i] ?? 0;
 
-    function getApiUrls() {
-        const urls = [];
+                    if (na !== nb) {
+                        return nb - na;
+                    }
+                }
 
-        const remoteUrl = "https://minecraft-server-termux.vercel.app/api/server_versions";
-        const sameOrigin = (window.location && window.location.origin && window.location.origin !== "null")
-            ? `${window.location.origin}/api/server_versions`
-            : null;
-
-        if (window.MSD_API_URL && typeof window.MSD_API_URL === "string") {
-            urls.push(window.MSD_API_URL);
-        }
-
-        urls.push(remoteUrl);
-
-        if (sameOrigin && sameOrigin !== remoteUrl) {
-            urls.push(sameOrigin);
-        }
-
-        urls.push("./api/server_versions");
-        return urls;
-    }
-
-    function getInitialLanguage() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved === "es" || saved === "en") {
-                return saved;
+                return 0;
             }
-        } catch (err) {
-            // Ignore storage failures and fall back to browser language.
-        }
 
-        const browserLanguage = (navigator.language || navigator.userLanguage || DEFAULT_LANGUAGE).toLowerCase();
-        return browserLanguage.startsWith("en") ? "en" : DEFAULT_LANGUAGE;
-    }
-
-    function saveLanguage(language) {
-        try {
-            localStorage.setItem(STORAGE_KEY, language);
-        } catch (err) {
-            // Storage is optional; the app still works without it.
-        }
-    }
-
-    function setLanguage(language, shouldPersist = true) {
-        if (language !== "es" && language !== "en") {
-            language = DEFAULT_LANGUAGE;
-        }
-
-        currentLanguage = language;
-
-        if (shouldPersist) {
-            saveLanguage(language);
-        }
-
-        document.documentElement.lang = language;
-
-        if (languageSelect) {
-            languageSelect.value = language;
-        }
-
-        applyStaticTranslations();
-        renderOfficialIndex();
-        syncSortButtons();
-        syncServerSortButtons();
-        syncChipState(serverFilters, selectedServers);
-        syncChipState(versionFilters, selectedMajors);
-        syncSubversionState();
-
-        if (currentToastKey) {
-            showToast(currentToastKey);
-        }
-    }
-
-    function applyStaticTranslations() {
-        document.title = t("appName");
-
-        if (metaDescription) {
-            metaDescription.setAttribute("content", t("metaDescription"));
-        }
-
-        document.querySelectorAll("[data-i18n]").forEach((element) => {
-            const key = element.dataset.i18n;
-            if (key) {
-                element.textContent = t(key);
+            function escapeHtml(value) {
+                return String(value)
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#39;");
             }
-        });
 
-        loading.textContent = t(currentStatusKey);
-    }
+            function normalizeRow(row) {
+                return {
+                    name: String(row?.name ?? ""),
+                    version: String(row?.version ?? ""),
+                    url: String(row?.url ?? ""),
+                    build: row?.build ?? ""
+                };
+            }
 
-    function setStatus(key, isLoading) {
-        currentStatusKey = key;
-        loading.textContent = t(key);
-        loading.classList.toggle("is-idle", !isLoading);
-    }
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add("is-visible");
 
-    function showToast(key, autoHide = true) {
-        currentToastKey = key;
-        toast.textContent = t(key);
-        toast.classList.add("is-visible");
-        toast.dataset.kind = key === "copyError" ? "error" : "info";
+                if (state.toastTimer) {
+                    clearTimeout(state.toastTimer);
+                }
 
-        if (toastTimer) {
-            clearTimeout(toastTimer);
-        }
+                state.toastTimer = window.setTimeout(() => {
+                    toast.classList.remove("is-visible");
+                }, 1700);
+            }
 
-        if (autoHide) {
-            toastTimer = setTimeout(() => {
-                toast.classList.remove("is-visible");
-                currentToastKey = "";
-            }, 1800);
-        }
-    }
+            async function copyText(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast("Comando copiado");
+                } catch (error) {
+                    console.error("No se pudo copiar:", error);
+                    showToast("No se pudo copiar");
+                }
+            }
 
-    async function loadData() {
-        setStatus("loading", true);
+            function showErrorModal(message) {
+                if (errorModalMessage) {
+                    errorModalMessage.textContent = message;
+                }
 
-        try {
-            const json = await fetchDataFromApi();
+                errorModal.classList.remove("is-hidden");
+                document.body.style.overflow = "hidden";
+                errorModalClose?.focus();
+            }
 
-            cachedData = Array.isArray(json.data) ? json.data : [];
-            serverEntries = Array.isArray(json.servers)
-                ? json.servers
-                    .slice()
-                    .sort((a, b) => Number(a.id ?? 0) - Number(b.id ?? 0))
-                    .map((server) => ({
-                        name: String(server.name ?? ""),
-                        url: String(server.url ?? "")
-                    }))
-                : [];
-            serverNames = serverEntries.map((server) => server.name);
+            function hideErrorModal() {
+                errorModal.classList.add("is-hidden");
+                document.body.style.overflow = "";
+            }
 
-            buildVersionIndex(Array.isArray(json.versions) ? json.versions : []);
-            renderFilterButtons();
-            renderOfficialIndex();
-            applyFilters();
-            setStatus("ready", false);
-        } catch (err) {
-            console.error("Error API:", err);
-            renderFilterButtons();
-            renderOfficialIndex();
-            renderRows([]);
-            setStatus("loadError", false);
-            showToast("loadError");
-        }
-    }
+            function getApiUrls() {
+                return API_URLS.slice();
+            }
 
-    async function fetchDataFromApi() {
-        let lastError = null;
+            async function loadData() {
+                const urls = getApiUrls();
+                let lastError = null;
 
-        for (const url of apiUrls) {
-            const controller = new AbortController();
-            const timeout = window.setTimeout(() => controller.abort(), 15000);
+                for (const url of urls) {
+                    try {
+                        const response = await fetch(url, {
+                            cache: "no-store",
+                            headers: { Accept: "application/json" }
+                        });
 
-            try {
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    cache: "no-store",
-                    headers: {
-                        Accept: "application/json"
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const json = await response.json();
+                        if (!json || !Array.isArray(json.data)) {
+                            throw new Error("Respuesta invalida");
+                        }
+
+                        state.rows = json.data.map(normalizeRow);
+                        state.servers = Array.isArray(json.servers)
+                            ? json.servers
+                                .map((server) => String(server?.name ?? ""))
+                                .filter(Boolean)
+                            : [];
+                        state.versions = Array.isArray(json.versions)
+                            ? json.versions
+                                .map((version) => String(version?.version ?? ""))
+                                .filter(Boolean)
+                            : [];
+
+                        if (!state.servers.length) {
+                            state.servers = Array.from(new Set(state.rows.map((row) => row.name).filter(Boolean)));
+                        }
+
+                        if (!state.versions.length) {
+                            state.versions = Array.from(new Set(state.rows.map((row) => row.version).filter(Boolean)));
+                        }
+
+                        initializeSelectors();
+                        return;
+                    } catch (error) {
+                        lastError = error;
+                    }
+                }
+
+                console.error("No se pudo cargar la API:", lastError);
+                state.rows = [];
+                state.servers = [];
+                state.versions = [];
+                state.selectedServer = "";
+                state.selectedVersion = "";
+                renderServerOptions([]);
+                renderVersionOptions([]);
+                syncServerSelect();
+                syncVersionSelect();
+                updateCommandPreview();
+                showErrorModal("No se pudo cargar la lista de servidores y versiones. Comprueba tu conexion e intenta de nuevo.");
+            }
+
+            function initializeSelectors() {
+                const uniqueServers = getSortedServers();
+                const uniqueVersions = Array.from(new Set(state.versions)).sort(compareVersionsDesc);
+
+                renderServerOptions(uniqueServers);
+                renderVersionOptions(uniqueVersions);
+
+                if (uniqueServers.includes("Paper")) {
+                    state.selectedServer = "Paper";
+                } else if (!state.selectedServer && uniqueServers.length) {
+                    state.selectedServer = uniqueServers[0];
+                }
+
+                syncServerSelect();
+                syncVersionOptions();
+
+                if (!state.selectedVersion) {
+                    state.selectedVersion = getAvailableVersionsForServer(state.selectedServer)[0] || uniqueVersions[0] || "";
+                }
+
+                syncVersionSelect();
+                updateCommandPreview();
+            }
+
+            function renderServerOptions(servers) {
+                serverOptions.innerHTML = servers.map((server) => `
+                    <button class="dropdown-option${server === state.selectedServer ? " is-active" : ""}" type="button" role="option" aria-selected="${String(server === state.selectedServer)}" data-dropdown-value="${escapeHtml(server)}" data-dropdown-target="server">
+                        ${escapeHtml(server)}
+                    </button>
+                `).join("");
+            }
+
+            function renderVersionOptions(versions) {
+                versionOptions.innerHTML = versions.map((version) => `
+                    <button class="dropdown-option${version === state.selectedVersion ? " is-active" : ""}" type="button" role="option" aria-selected="${String(version === state.selectedVersion)}" data-dropdown-value="${escapeHtml(version)}" data-dropdown-target="version">
+                        ${escapeHtml(version)}
+                    </button>
+                `).join("");
+            }
+
+            function syncServerSelect() {
+                serverSelectLabel.textContent = state.selectedServer || "Sin servidor";
+                serverSelect.setAttribute("aria-label", `Servidor seleccionado: ${state.selectedServer || "ninguno"}`);
+                renderServerOptions(getSortedServers());
+            }
+
+            function getAvailableVersionsForServer(serverName) {
+                const filtered = state.rows
+                    .filter((row) => !serverName || row.name === serverName)
+                    .map((row) => row.version)
+                    .filter(Boolean);
+
+                return Array.from(new Set(filtered)).sort(compareVersionsDesc);
+            }
+
+            function syncVersionOptions() {
+                const availableVersions = getVisibleVersions();
+                renderVersionOptions(availableVersions);
+
+                if (state.selectedVersion && availableVersions.includes(state.selectedVersion)) {
+                    return;
+                }
+
+                state.selectedVersion = availableVersions[0] || "";
+            }
+
+            function syncVersionSelect() {
+                versionSelectLabel.textContent = state.selectedVersion || "Sin version";
+                versionSelect.setAttribute("aria-label", `Version seleccionada: ${state.selectedVersion || "ninguna"}`);
+                renderVersionOptions(getVisibleVersions());
+            }
+
+            function getSortedServers() {
+                return Array.from(new Set(state.servers)).sort((a, b) => {
+                    if (a === "Paper" && b !== "Paper") return -1;
+                    if (b === "Paper" && a !== "Paper") return 1;
+                    return a.localeCompare(b);
+                });
+            }
+
+            function getVisibleVersions() {
+                return state.rows.length > 0
+                    ? getAvailableVersionsForServer(state.selectedServer)
+                    : Array.from(new Set(state.versions)).sort(compareVersionsDesc);
+            }
+
+            function closeDropdown(dropdown = null) {
+                const targets = dropdown ? [dropdown] : dropdowns;
+
+                targets.forEach((item) => {
+                    item.classList.remove("is-open");
+                    const trigger = item.querySelector(".dropdown-trigger");
+                    if (trigger) {
+                        trigger.setAttribute("aria-expanded", "false");
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`API responded with ${response.status} for ${url}`);
+                if (!dropdown || state.activeDropdown === dropdown) {
+                    state.activeDropdown = null;
                 }
-
-                return await response.json();
-            } catch (error) {
-                lastError = error;
-            } finally {
-                window.clearTimeout(timeout);
             }
-        }
 
-        throw lastError || new Error("Unable to load API data");
-    }
-
-    function buildVersionIndex(versions) {
-        versionMap = new Map();
-
-        versions
-            .slice()
-            .sort((a, b) => compareVersions(a.version, b.version))
-            .forEach((entry) => {
-                const version = String(entry.version);
-                const major = getMajorVersion(version);
-
-                if (!versionMap.has(major)) {
-                    versionMap.set(major, []);
+            function openDropdown(dropdown) {
+                if (!dropdown) {
+                    return;
                 }
 
-                versionMap.get(major).push(version);
+                closeDropdown();
+                dropdown.classList.add("is-open");
+                const trigger = dropdown.querySelector(".dropdown-trigger");
+                if (trigger) {
+                    trigger.setAttribute("aria-expanded", "true");
+                }
+                state.activeDropdown = dropdown;
+            }
+
+            function toggleDropdown(dropdown) {
+                if (!dropdown) {
+                    return;
+                }
+
+                if (dropdown.classList.contains("is-open")) {
+                    closeDropdown(dropdown);
+                    return;
+                }
+
+                openDropdown(dropdown);
+            }
+
+            function updateServerSelection(value) {
+                if (!value || value === state.selectedServer) {
+                    closeDropdown();
+                    return;
+                }
+
+                state.selectedServer = value;
+                const availableVersions = getAvailableVersionsForServer(state.selectedServer);
+
+                if (!availableVersions.includes(state.selectedVersion)) {
+                    state.selectedVersion = availableVersions[0] || "";
+                }
+
+                syncServerSelect();
+                syncVersionOptions();
+                syncVersionSelect();
+                updateCommandPreview();
+                closeDropdown();
+            }
+
+            function updateVersionSelection(value) {
+                if (!value || value === state.selectedVersion) {
+                    closeDropdown();
+                    return;
+                }
+
+                state.selectedVersion = value;
+                syncVersionSelect();
+                updateCommandPreview();
+                closeDropdown();
+            }
+
+            function findMatchingRow() {
+                if (!state.selectedServer || !state.selectedVersion) {
+                    return null;
+                }
+
+                return state.rows.find((row) => row.name === state.selectedServer && row.version === state.selectedVersion) || null;
+            }
+
+            function updateCommandPreview() {
+                const row = findMatchingRow();
+                const versionText = state.selectedVersion || "una version";
+                const serverText = state.selectedServer || "un servidor";
+
+                if (row && row.url) {
+                    const command = `${INSTALL_COMMAND_BASE}"${row.url}"`;
+                    installCommand.textContent = command;
+                    urlPreview.textContent = row.url;
+                    selectionSummary.textContent = `${serverText} - ${versionText}`;
+                    return;
+                }
+
+                installCommand.textContent = DEFAULT_INSTALL_COMMAND;
+                urlPreview.textContent = state.selectedServer && state.selectedVersion
+                    ? "No se encontro una URL para esa combinacion"
+                    : "La URL aparecera aqui.";
+                selectionSummary.textContent = state.selectedServer && state.selectedVersion
+                    ? `${serverText} - ${versionText}`
+                    : "Selecciona servidor y version";
+            }
+
+            copyButtons.forEach((button) => {
+                button.addEventListener("click", async () => {
+                    const targetId = button.dataset.copyTarget;
+                    const target = document.getElementById(targetId);
+                    if (!target) {
+                        return;
+                    }
+
+                    await copyText(target.textContent.trim());
+                });
             });
 
-        majorVersions = Array.from(versionMap.keys()).sort(compareVersions);
-    }
+            serverSelect.addEventListener("click", () => toggleDropdown(serverDropdown));
+            versionSelect.addEventListener("click", () => toggleDropdown(versionDropdown));
 
-    function renderFilterButtons() {
-        serverFilters.innerHTML = "";
-        versionFilters.innerHTML = "";
-        subversionFilters.innerHTML = "";
-        subversionWrap.classList.add("is-hidden");
+            serverOptions.addEventListener("click", (event) => {
+                const button = event.target.closest("[data-dropdown-target='server']");
+                if (!button) {
+                    return;
+                }
 
-        renderChipGroup(serverFilters, serverNames, selectedServers);
-
-        majorVersions.forEach((major) => {
-            versionFilters.appendChild(createChip(major, major, selectedMajors.has(major), false));
-        });
-
-        renderSubversionGroups();
-    }
-
-    function renderOfficialIndex() {
-        if (!officialIndexLinks) {
-            return;
-        }
-
-        officialIndexLinks.innerHTML = serverEntries
-            .filter((server) => server.name && server.url)
-            .map((server) => {
-                return `
-                    <a class="official-index-link" href="${escapeAttr(server.url)}" target="_blank" rel="noopener noreferrer">
-                        <span class="official-index-link-text">
-                            <span class="official-index-link-label">${escapeHtml(server.name)}</span>
-                            <span class="official-index-link-meta">${escapeHtml(t("officialSite"))}</span>
-                        </span>
-                        <span class="official-index-link-arrow" aria-hidden="true">↗</span>
-                    </a>
-                `;
-            })
-            .join("");
-    }
-
-    function renderSubversionGroups() {
-        subversionFilters.innerHTML = "";
-
-        const activeMajors = selectedMajors.size
-            ? Array.from(selectedMajors).sort(compareVersions)
-            : [];
-
-        if (!activeMajors.length) {
-            subversionWrap.classList.add("is-hidden");
-            return;
-        }
-
-        let hasVisibleSubversions = false;
-
-        activeMajors.forEach((major) => {
-            const versions = versionMap.get(major) || [];
-            const selectedForMajor = selectedSubversions.get(major) || new Set();
-
-            if (!versions.length) {
-                return;
-            }
-
-            const group = document.createElement("div");
-            group.className = "subversion-group";
-
-            const title = document.createElement("div");
-            title.className = "subversion-title";
-            title.textContent = major;
-            group.appendChild(title);
-
-            const chips = document.createElement("div");
-            chips.className = "chip-group subversion-chips";
-
-            versions.forEach((version) => {
-                chips.appendChild(createChip(version, version, selectedForMajor.has(version), false));
+                updateServerSelection(button.dataset.dropdownValue || "");
             });
 
-            group.appendChild(chips);
-            subversionFilters.appendChild(group);
-            hasVisibleSubversions = true;
-        });
-
-        subversionWrap.classList.toggle("is-hidden", !hasVisibleSubversions);
-    }
-
-    function renderChipGroup(container, values, selectedSet) {
-        values.forEach((value) => {
-            container.appendChild(createChip(value, value, selectedSet.has(value), false));
-        });
-    }
-
-    function createChip(label, value, active, isReset) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `filter-chip${active ? " is-active" : ""}${isReset ? " is-empty" : ""}`;
-        button.textContent = label;
-        button.dataset.value = value;
-        button.dataset.reset = String(isReset);
-        button.setAttribute("aria-pressed", String(active));
-        return button;
-    }
-
-    function toggleSelection(selectedSet, value) {
-        if (selectedSet.has(value)) {
-            selectedSet.delete(value);
-            return false;
-        }
-
-        selectedSet.add(value);
-        return true;
-    }
-
-    function compareVersions(a, b) {
-        const pa = String(a).split(".").map((part) => Number.parseInt(part, 10) || 0);
-        const pb = String(b).split(".").map((part) => Number.parseInt(part, 10) || 0);
-        const len = Math.max(pa.length, pb.length);
-
-        for (let i = 0; i < len; i += 1) {
-            const na = pa[i] ?? 0;
-            const nb = pb[i] ?? 0;
-
-            if (na !== nb) {
-                return na - nb;
-            }
-        }
-
-        return 0;
-    }
-
-    function getMajorVersion(version) {
-        const parts = String(version).split(".");
-        if (parts.length >= 2) {
-            return `${parts[0]}.${parts[1]}`;
-        }
-
-        return String(version);
-    }
-
-    function applyFilters() {
-        const filtered = cachedData.filter((row) => {
-            const serverMatch = selectedServers.size === 0 || selectedServers.has(String(row.name));
-
-            if (!selectedMajors.size) {
-                return serverMatch;
-            }
-
-            const major = getMajorVersion(row.version);
-            if (!selectedMajors.has(major)) {
-                return false;
-            }
-
-            const selectedForMajor = selectedSubversions.get(major);
-            if (!selectedForMajor || selectedForMajor.size === 0) {
-                return serverMatch;
-            }
-
-            return serverMatch && selectedForMajor.has(String(row.version));
-        });
-
-        renderRows(sortRows(filtered));
-        syncChipState(serverFilters, selectedServers);
-        syncChipState(versionFilters, selectedMajors);
-        syncSubversionState();
-        renderSubversionGroups();
-    }
-
-    function sortRows(rows) {
-        return rows.slice().sort((a, b) => {
-            if (sortByServer && hasActiveFilters()) {
-                const serverResult = String(a.name).localeCompare(String(b.name));
-
-                if (serverResult !== 0) {
-                    return serverResult;
+            versionOptions.addEventListener("click", (event) => {
+                const button = event.target.closest("[data-dropdown-target='version']");
+                if (!button) {
+                    return;
                 }
-            }
 
-            const versionResult = compareVersions(a.version, b.version);
+                updateVersionSelection(button.dataset.dropdownValue || "");
+            });
 
-            if (versionResult !== 0) {
-                return sortOrder === "desc" ? -versionResult : versionResult;
-            }
+            document.addEventListener("click", (event) => {
+                const clickedInsideDropdown = dropdowns.some((dropdown) => dropdown.contains(event.target));
+                if (!clickedInsideDropdown) {
+                    closeDropdown();
+                }
+            });
 
-            return String(a.name).localeCompare(String(b.name));
-        });
-    }
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") {
+                    closeDropdown();
+                    hideErrorModal();
+                }
+            });
 
-    function hasActiveFilters() {
-        return selectedServers.size > 0 || selectedMajors.size > 0;
-    }
+            errorModalClose?.addEventListener("click", hideErrorModal);
+            errorModalRetry?.addEventListener("click", () => {
+                window.location.reload();
+            });
 
-    function syncSortButtons() {
-        sortButtons.forEach((button) => {
-            const isActive = button.dataset.sort === sortOrder;
-            button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-pressed", String(isActive));
-        });
-    }
+            errorModal?.addEventListener("click", (event) => {
+                if (event.target === errorModal) {
+                    hideErrorModal();
+                }
+            });
 
-    function syncServerSortButtons() {
-        serverSortButtons.forEach((button) => {
-            const isActive = button.dataset.serverSort === String(sortByServer);
-            button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-pressed", String(isActive));
-        });
-    }
-
-    function syncChipState(container, selectedSet) {
-        if (!container) {
-            return;
-        }
-
-        container.querySelectorAll(".filter-chip").forEach((button) => {
-            const value = button.dataset.value;
-            const isActive = selectedSet.has(value);
-            button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-pressed", String(isActive));
-        });
-    }
-
-    function syncSubversionState() {
-        subversionFilters.querySelectorAll(".filter-chip").forEach((button) => {
-            const value = button.dataset.value;
-            const major = getMajorVersion(value);
-            const selectedForMajor = selectedSubversions.get(major);
-            const isActive = Boolean(selectedForMajor && selectedForMajor.has(value));
-            button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-pressed", String(isActive));
-        });
-    }
-
-    function renderRows(data) {
-        resultCount.textContent = String(data.length);
-
-        if (!data.length) {
-            results.innerHTML = `
-                <tr class="empty-row">
-                    <td colspan="5">${escapeHtml(t("emptyState"))}</td>
-                </tr>
-            `;
-            return;
-        }
-
-        results.innerHTML = data.map((row) => `
-            <tr>
-                <td>${escapeHtml(row.name)}</td>
-                <td>${escapeHtml(row.version)}</td>
-                <td><span class="build-pill ${getBuildClass(row.build)}">${escapeHtml(String(row.build))}</span></td>
-                <td>
-                    <a class="download-button" href="${escapeAttr(row.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("download"))}</a>
-                </td>
-                <td>
-                    <button class="copy-button" type="button" data-copy-url="${escapeAttr(row.url)}">${escapeHtml(t("copy"))}</button>
-                </td>
-            </tr>
-        `).join("");
-    }
-
-    function getBuildClass(build) {
-        const value = String(build).toLowerCase();
-
-        if (value.includes("stable")) return "build-stable";
-        if (value.includes("alpha")) return "build-alpha";
-        if (value.includes("beta")) return "build-beta";
-        if (value.includes("experimental")) return "build-experimental";
-
-        return "build-unknown";
-    }
-
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
-    }
-
-    function escapeAttr(value) {
-        return escapeHtml(value).replaceAll("`", "&#96;");
-    }
-
-    async function copyUrl(url) {
-        try {
-            await navigator.clipboard.writeText(url);
-            showToast("copySuccess");
-        } catch (err) {
-            console.error("Error copiando:", err);
-            showToast("copyError");
-        }
-    }
-
-    function onServerChipClick(event) {
-        const button = event.target.closest(".filter-chip");
-        if (!button || button.disabled) return;
-
-        toggleSelection(selectedServers, button.dataset.value);
-        applyFilters();
-    }
-
-    function onMajorChipClick(event) {
-        const button = event.target.closest(".filter-chip");
-        if (!button || button.disabled) return;
-
-        const major = button.dataset.value;
-
-        if (selectedMajors.has(major)) {
-            selectedMajors.delete(major);
-            selectedSubversions.delete(major);
-        } else {
-            selectedMajors.add(major);
-            if (!selectedSubversions.has(major)) {
-                selectedSubversions.set(major, new Set());
-            }
-        }
-
-        applyFilters();
-    }
-
-    function onSubversionChipClick(event) {
-        const button = event.target.closest(".filter-chip");
-        if (!button || button.disabled) return;
-
-        const version = button.dataset.value;
-        const major = getMajorVersion(version);
-
-        if (!selectedSubversions.has(major)) {
-            selectedSubversions.set(major, new Set());
-        }
-
-        const selectedForMajor = selectedSubversions.get(major);
-        toggleSelection(selectedForMajor, version);
-        applyFilters();
-    }
-
-    function onSortClick(event) {
-        const button = event.target.closest("[data-sort]");
-        if (!button) return;
-
-        sortOrder = button.dataset.sort;
-        syncSortButtons();
-        applyFilters();
-    }
-
-    function onServerSortClick(event) {
-        const button = event.target.closest("[data-server-sort]");
-        if (!button) return;
-
-        sortByServer = button.dataset.serverSort === "true";
-        syncServerSortButtons();
-        applyFilters();
-    }
-
-    function onClearFilterClick(event) {
-        const button = event.target.closest("[data-clear-filter]");
-        if (!button) return;
-
-        if (button.dataset.clearFilter === "server") {
-            selectedServers.clear();
-        }
-
-        if (button.dataset.clearFilter === "version") {
-            selectedMajors.clear();
-            selectedSubversions.clear();
-        }
-
-        applyFilters();
-    }
-
-    function onLanguageChange(event) {
-        setLanguage(event.target.value);
-    }
-
-    serverFilters.addEventListener("click", onServerChipClick);
-    versionFilters.addEventListener("click", onMajorChipClick);
-    subversionFilters.addEventListener("click", onSubversionChipClick);
-    sortButtons.forEach((button) => {
-        button.addEventListener("click", onSortClick);
-    });
-    serverSortButtons.forEach((button) => {
-        button.addEventListener("click", onServerSortClick);
-    });
-    clearFilterButtons.forEach((button) => {
-        button.addEventListener("click", onClearFilterClick);
-    });
-    languageSelect.addEventListener("change", onLanguageChange);
-
-    results.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-copy-url]");
-        if (!button) return;
-        copyUrl(button.dataset.copyUrl);
-    });
-
-    setLanguage(currentLanguage, false);
-    syncSortButtons();
-    loadData();
-});
+            debianCommand.textContent = DEBIAN_COMMAND;
+            installCommand.textContent = DEFAULT_INSTALL_COMMAND;
+            loadData();
+        })();

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Catálogo de descargas de servidores de Minecraft con filtros rápidos, selector de idioma y enlaces directos.">
+    <title>Minecraft Server Downloads</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="i18n.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="page-shell">
+        <main class="app-card">
+            <header class="hero">
+                <div class="hero-top">
+                    <div class="hero-copy-block">
+                        <h1 data-i18n="appName">Minecraft Server Downloads</h1>
+                        <p class="hero-copy" data-i18n="heroCopy">
+                            Explora builds, filtra por servidor o versión y accede a descargas directas desde una interfaz más clara y profesional.
+                        </p>
+                    </div>
+
+                    <div class="language-switcher">
+                        <label for="language-select" data-i18n="languageLabel">Idioma</label>
+                        <select id="language-select" name="language-select">
+                            <option value="es" data-i18n="languageSpanish">Español</option>
+                            <option value="en" data-i18n="languageEnglish">English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="hero-stats" aria-label="Resumen">
+                    <div class="stat">
+                        <span class="stat-label" data-i18n="statusLabel">Estado</span>
+                        <strong id="loading" aria-live="polite" aria-atomic="true">Cargando datos...</strong>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label" data-i18n="resultsLabel">Resultados</span>
+                        <strong id="result-count">0</strong>
+                    </div>
+                </div>
+
+                <div class="official-index" aria-label="Accesos oficiales">
+                    <div class="official-index-header">
+                        <span class="panel-kicker" data-i18n="officialIndexLabel">Sitios oficiales</span>
+                    </div>
+                    <div id="official-index-links" class="official-index-links"></div>
+                </div>
+            </header>
+
+            <section class="panel filters-panel" aria-label="Filtros de búsqueda">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker" data-i18n="exploreKicker">Explorar</p>
+                        <h2 data-i18n="filtersTitle">Filtros rápidos</h2>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="field">
+                        <div class="field-header">
+                            <span data-i18n="serverLabel">Servidor</span>
+                            <button class="clear-filter-button" type="button" data-clear-filter="server" data-i18n="clearButton">Limpiar</button>
+                        </div>
+                        <div id="server-filters" class="chip-group" aria-label="Servidores"></div>
+                    </div>
+
+                    <div class="field">
+                        <div class="field-header">
+                            <span data-i18n="versionLabel">Versión</span>
+                            <button class="clear-filter-button" type="button" data-clear-filter="version" data-i18n="clearButton">Limpiar</button>
+                        </div>
+                        <div id="version-filters" class="chip-group" aria-label="Versiones"></div>
+                        <div id="subversion-wrap" class="subversion-wrap is-hidden" aria-live="polite">
+                            <span class="subversion-title" data-i18n="subversionLabel">Subversión</span>
+                            <div id="version-subfilters" class="chip-group subversion-groups" aria-label="Subversiones"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel results-panel" aria-label="Tabla de resultados">
+                <div class="panel-header">
+                    <div>
+                        <p class="panel-kicker" data-i18n="buildsKicker">Builds</p>
+                        <h2 data-i18n="downloadsTitle">Descargas disponibles</h2>
+                    </div>
+                    <div class="sort-controls">
+                        <div class="sort-control" aria-label="Ordenar versiones">
+                            <span data-i18n="orderLabel">Orden versiones</span>
+                            <button class="sort-button is-active" type="button" data-sort="desc" aria-pressed="true" data-i18n="orderDesc">Mayor a menor</button>
+                            <button class="sort-button" type="button" data-sort="asc" aria-pressed="false" data-i18n="orderAsc">Menor a mayor</button>
+                        </div>
+                        <div class="sort-control server-sort-control" aria-label="Ordenar por servidor">
+                            <span data-i18n="serverOrderLabel">Orden por servidor</span>
+                            <button class="sort-button" type="button" data-server-sort="true" aria-pressed="false" data-i18n="yes">Sí</button>
+                            <button class="sort-button is-active" type="button" data-server-sort="false" aria-pressed="true" data-i18n="no">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="tableServer">Servidor</th>
+                                <th scope="col" data-i18n="tableVersion">Versión</th>
+                                <th scope="col" data-i18n="tableBuild">Build</th>
+                                <th scope="col" data-i18n="tableDownload">Descarga</th>
+                                <th scope="col" data-i18n="tableLink">Enlace</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results" aria-live="polite"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
