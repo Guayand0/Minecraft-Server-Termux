@@ -604,6 +604,63 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(1, 6, 12, 0.72);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.is-hidden {
+            display: none;
+        }
+
+        .modal-card {
+            width: min(100%, 520px);
+            padding: 22px;
+            border: 1px solid rgba(180, 205, 255, 0.18);
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(18, 28, 45, 0.98), rgba(10, 17, 31, 0.98));
+            box-shadow: var(--shadow);
+        }
+
+        .modal-card h2 {
+            margin: 0 0 10px;
+            font-size: 1.25rem;
+        }
+
+        .modal-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .modal-button {
+            min-height: 40px;
+            padding: 0 14px;
+            border: 1px solid rgba(180, 205, 255, 0.18);
+            border-radius: 999px;
+            color: var(--text);
+            background: rgba(8, 15, 27, 0.78);
+            cursor: pointer;
+        }
+
+        .modal-button-primary {
+            color: #08111f;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+        }
+
         .empty-state {
             color: var(--muted);
         }

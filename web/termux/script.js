@@ -25,6 +25,10 @@
             const selectionSummary = document.getElementById("selection-summary");
             const urlPreview = document.getElementById("url-preview");
             const toast = document.getElementById("toast");
+            const errorModal = document.getElementById("error-modal");
+            const errorModalMessage = document.getElementById("error-modal-message");
+            const errorModalClose = document.getElementById("error-modal-close");
+            const errorModalRetry = document.getElementById("error-modal-retry");
             const copyButtons = document.querySelectorAll("[data-copy-target]");
             const dropdowns = [serverDropdown, versionDropdown];
 
@@ -96,6 +100,21 @@
                 }
             }
 
+            function showErrorModal(message) {
+                if (errorModalMessage) {
+                    errorModalMessage.textContent = message;
+                }
+
+                errorModal.classList.remove("is-hidden");
+                document.body.style.overflow = "hidden";
+                errorModalClose?.focus();
+            }
+
+            function hideErrorModal() {
+                errorModal.classList.add("is-hidden");
+                document.body.style.overflow = "";
+            }
+
             function getApiUrls() {
                 return API_URLS.slice();
             }
@@ -149,20 +168,19 @@
 
                 console.error("No se pudo cargar la API:", lastError);
                 state.rows = [];
-                state.servers = ["Paper", "Vanilla", "Fabric", "Forge", "Spigot", "Purpur"];
-                state.versions = [
-                    "1.21.8", "1.21.7", "1.21.6", "1.21.5", "1.21.4", "1.21.3", "1.21.2", "1.21.1", "1.21",
-                    "1.20.6", "1.20.5", "1.20.4", "1.20.3", "1.20.2", "1.20.1", "1.20",
-                    "1.19.4", "1.19.3", "1.19.2", "1.19.1", "1.19",
-                    "1.18.2", "1.18.1", "1.18",
-                    "1.17.1", "1.17",
-                    "1.16.5"
-                ];
-                initializeSelectors(true);
-                showToast("Se usaron datos locales de respaldo");
+                state.servers = [];
+                state.versions = [];
+                state.selectedServer = "";
+                state.selectedVersion = "";
+                renderServerOptions([]);
+                renderVersionOptions([]);
+                syncServerSelect();
+                syncVersionSelect();
+                updateCommandPreview();
+                showErrorModal("No se pudo cargar la lista de servidores y versiones. Comprueba tu conexion e intenta de nuevo.");
             }
 
-            function initializeSelectors(useFallback = false) {
+            function initializeSelectors() {
                 const uniqueServers = getSortedServers();
                 const uniqueVersions = Array.from(new Set(state.versions)).sort(compareVersionsDesc);
 
@@ -184,10 +202,6 @@
 
                 syncVersionSelect();
                 updateCommandPreview();
-
-                if (useFallback) {
-                    selectionSummary.textContent = "Modo de respaldo activo";
-                }
             }
 
             function renderServerOptions(servers) {
@@ -400,6 +414,18 @@
             document.addEventListener("keydown", (event) => {
                 if (event.key === "Escape") {
                     closeDropdown();
+                    hideErrorModal();
+                }
+            });
+
+            errorModalClose?.addEventListener("click", hideErrorModal);
+            errorModalRetry?.addEventListener("click", () => {
+                window.location.reload();
+            });
+
+            errorModal?.addEventListener("click", (event) => {
+                if (event.target === errorModal) {
+                    hideErrorModal();
                 }
             });
 

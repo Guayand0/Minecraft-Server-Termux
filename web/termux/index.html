@@ -146,5 +146,17 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="error-modal" class="modal-overlay is-hidden" role="presentation">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="error-modal-title">
+            <h2 id="error-modal-title">Error al cargar los datos</h2>
+            <p id="error-modal-message">
+                No se pudo cargar la lista de servidores y versiones desde la API.
+            </p>
+            <div class="modal-actions">
+                <button id="error-modal-retry" class="modal-button modal-button-primary" type="button">Reintentar</button>
+                <button id="error-modal-close" class="modal-button" type="button">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
