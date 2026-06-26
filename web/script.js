@@ -1,8 +1,8 @@
 (() => {
-            const ROOT = "https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/";
-            const DEBIAN_COMMAND = `bash <(curl -fsSL ${ROOT}1_install-Debian.sh)`;
-            const INSTALL_COMMAND_BASE = `bash <(curl -fsSL ${ROOT}2_install-MC.sh)`;
-            const DEFAULT_INSTALL_COMMAND = `${INSTALL_COMMAND_BASE} "<URL_VERSION>"`;
+            const ROOT_COMMAND = "curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/";
+            const DEBIAN_COMMAND = `${ROOT_COMMAND}1_install-Debian.sh | bash`;
+            const INSTALL_COMMAND_BASE = `${ROOT_COMMAND}2_install-MC.sh | bash -s `;
+            const DEFAULT_INSTALL_COMMAND = `${INSTALL_COMMAND_BASE}"<URL_VERSION>"`;
             const API_URLS = [
                 window.MSD_API_URL,
                 "https://minecraft-server-termux.vercel.app/api/server_versions",
