@@ -311,7 +311,9 @@
             gap: 16px;
             width: 100%;
             min-width: 0;
+            margin-top: 24px;
             padding: 0 34px 34px;
+            border-bottom: 1px solid rgba(180, 205, 255, 0.12);
         }
 
         .command-grid {
@@ -394,6 +396,10 @@
             background: linear-gradient(180deg, rgba(3, 7, 14, 0.72), rgba(8, 13, 22, 0.95));
             scrollbar-width: thin;
             scrollbar-color: rgba(102, 227, 255, 0.35) rgba(255, 255, 255, 0.05);
+        }
+
+        .information {
+            padding-top: 14px;
         }
 
         pre {
@@ -506,6 +512,15 @@
             box-shadow: 0 0 0 4px rgba(255, 177, 95, 0.14);
         }
 
+        .instructions {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            padding: 0 34px 34px;
+            border-bottom: 1px solid rgba(180, 205, 255, 0.12);
+        }
+        
         .requirements {
             display: grid;
             grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -567,6 +582,7 @@
             gap: 16px;
             margin-top: 24px;
             padding: 0 34px 34px;
+            border-bottom: 1px solid rgba(180, 205, 255, 0.12);
         }
 
         .step-card {

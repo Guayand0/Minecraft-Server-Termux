@@ -95,7 +95,7 @@
                     <span class="step-number">2</span>
                     <h3>Inicia Debian</h3>
                     <p>
-                        Al terminar de instalar, entra a Debian usando <code>./1_debian.sh</code> desde la terminal.
+                        Al terminar de instalar, entra a Debian usando <code>./debian.sh</code> desde la terminal.
                     </p>
                 </article>
 
@@ -122,17 +122,17 @@
                     <span class="step-number">5</span>
                     <h3>Inicia el servidor de Minecraft</h3>
                     <p>
-                        Al terminar de instalar, inicia el servidor de Minecraft usando <code>./1_start.sh</code> desde la terminal.
+                        Al terminar de instalar, inicia el servidor de Minecraft usando <code>./start.sh</code> desde la terminal.
                     </p>
                 </article>
 
                 <article class="step-card">
                     <span class="step-number">6</span>
-                    <h3>Configuración del servidor</h3>
+                    <h3>Configuración del servidor (Opcional)</h3>
                     <p>
-                        Usa el archivo <code>server.properties</code> para personalizar el servidor. Para modificarlo usa
-                        <code>nano server.properties</code> desde la terminal.
+                        Usa el archivo <code>server.properties</code> para personalizar el servidor.
                     </p>
+                    <a class="step-link" href="#instruction-files">Instrucciones</a>
                 </article>
             </section>
 
@@ -160,7 +160,9 @@
                             <button class="copy-button" type="button" data-copy-target="install-command">Copiar comando</button>
                         </div>
                         <div class="code-shell">
-                            <pre><code id="install-command">curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/2_install-MC.sh | bash -s "&lt;URL_VERSION&gt;"</code></pre>
+                            <!-- <pre><code id="install-command">curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/2_install-MC.sh | bash -s "&lt;URL_VERSION&gt;"</code></pre> -->
+                            <pre><code id="install-command">bash &lt;(curl -fsSL https://raw.githubusercontent.com/Guayand0/Minecraft-Server-Termux/main/2_install-MC.sh) "&lt;URL_VERSION&gt;"</code></pre>
+                            
                         </div>
                         <div class="status-row">
                             <span id="selection-summary" class="status-pill"><span class="status-dot"></span>Cargando opciones...</span>
@@ -169,6 +171,118 @@
                     </article>
                 </div>
             </section>
+
+            <section class="instructions" aria-label="Pasos a seguir">
+                <article class="step-card" id="instruction-files">
+                    <h3>Archivos</h3>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para crear un archivo usa <code>touch</code> antes del nombre del archivo.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>touch hola.txt</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para modificar un archivo usa <code>nano</code> antes del nombre del archivo.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>nano server.properties</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para guardar un archivo abierto usa <code>Ctrl + O</code> y luego <code>Ctrl + X</code>
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para salir sin guardar un archivo abierto usa <code>Ctrl + X</code> y luego <code>Y</code>
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para eliminar un archivo usa <code>rm</code> antes del nombre del archivo.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>rm hola.txt</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para dar permisos de ejecución a un archivo usa <code>chmod +x</code> antes del nombre del archivo.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>chmod +x start.sh</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                </article>
+
+                <article class="step-card">
+                    <h3>Carpetas</h3>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para crear una carpeta usa <code>mkdir</code> antes del nombre de la carpeta.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>mkdir server_26.2</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para entrar en una carpeta usa <code>cd</code> antes del nombre de la carpeta.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>cd server_26.2</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para salir de una carpeta usa <code>cd ..</code> en la terminal.
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para eliminar una carpeta y su contenido usa <code>rm -r</code> antes del nombre de la carpeta.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>rm -r server_26.2</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para ver el contenido de una carpeta usa <code>ls</code> en la terminal.
+                    </p>
+<!-- ------------------------------------------ -->
+                </article>
+
+                <article class="step-card">
+                    <h3>Descargar</h3>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para descargar mods o plugins entra en la carpeta <code>mods</code> o <code>plugins</code>
+                        del servidor y usa <code>curl -fsSL</code> antes de la URL. Se descargará en la carpeta actual.
+                    </p>
+                    <div class="code-shell">
+                        <pre><code>curl -fsSL &lt;URL_ARCHIVO&gt;</code></pre>
+                    </div>
+<!-- ------------------------------------------ -->
+                </article>
+
+                <article class="step-card">
+                    <h3>Servidor de Minecraft</h3>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para iniciar el servidor usa <code>./start.sh</code> dentro de la carpeta del servidor.
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para parar el servidor usa <code>stop</code> en la terminal mientras el servidor este corriendo.
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para reiniciar el servidor usa <code>restart</code> en la terminal mientras el servidor este corriendo.
+                    </p>
+<!-- ------------------------------------------ -->
+                    <p class="information">
+                        - Para cambiar la cantidad de RAM usada por el servidor modifica el archivo <code>start.sh</code> y cambia el valor de <code>RAM</code>.
+                    </p>
+<!-- ------------------------------------------ -->
+                </article>
+            </section>
+
 
         </section>
     </main>

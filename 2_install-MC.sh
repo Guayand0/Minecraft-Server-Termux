@@ -10,27 +10,41 @@ apt install -y openjdk-25-jdk
 MC_URL="$1"
 
 if [ -z "$MC_URL" ]; then
-  echo "Uso: $0 -s <URL_server.jar>"
+  echo "Uso: $0 <URL_server.jar>"
   echo "Ejemplo:"
-  echo "$0 -s https://api.purpurmc.org/v2/purpur/26.2/2603/download"
+  echo "$0 https://api.purpurmc.org/v2/purpur/26.2/2603/download"
   exit 1
 fi
 
 echo "Descargando server.jar desde:"
 echo "$MC_URL"
 
-curl -L -o server.jar "$MC_URL"
+if ! curl -fL -o server.jar "$MC_URL"; then
+  echo "Error: fallo al descargar server.jar"
+  exit 1
+fi
 
-# Crear 1_start.sh
-cat << 'EOF' > 1_start.sh
-java -Xmx1024M -jar server.jar nogui
+# Crear start.sh
+cat << 'EOF' > start.sh
+#!/data/data/com.termux/files/usr/bin/bash
+
+# ===== Configuración =====
+JAR_FILE="server.jar"
+
+# RAM (en MB)
+MIN_RAM="1024"
+MAX_RAM="2048"
+
+# ===== Ejecución =====
+java -Xms${MIN_RAM}M -Xmx${MAX_RAM}M -jar "${JAR_FILE}" nogui
 EOF
 
-chmod +x 1_start.sh
+chmod +x start.sh
 
-# Crear eula
+# Crear eula.txt
 cat << 'EOF' > eula.txt
 eula=true
 EOF
 
-echo "Instalación completa. Usa './1_start.sh' para inicair el servidor"
+echo "Instalación del servidor completada."
+echo "Usa './start.sh' para inicair el servidor."
