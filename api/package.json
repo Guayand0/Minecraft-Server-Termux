@@ -1,8 +1,0 @@
-{
-  "name": "minecraft-server-termux-api",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "mysql2": "^3.22.5"
-  }
-}
