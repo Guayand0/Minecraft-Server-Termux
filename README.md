@@ -11,7 +11,7 @@
 ```bash
 pkg update -y && pkg install git -y
 git clone https://github.com/Guayand0/Minecraft-Server-Termux
-cd Minecraft-Server-Termux && bash install.sh
+cd ~/Minecraft-Server-Termux && bash install.sh
 ```
 
 ---
@@ -23,7 +23,7 @@ cd Minecraft-Server-Termux && bash install.sh
 ```bash
 apt update -y && apt install -y git wget
 git clone https://github.com/Guayand0/Minecraft-Server-Termux
-cd Minecraft-Server-Termux && bash mc.sh
+cd ~/Minecraft-Server-Termux && bash mc.sh
 cd ~/mc-server
 ```
 
@@ -84,21 +84,25 @@ bash start.sh
 ---
 ---
 
-# Instalar agente de playit.gg
-## 1º
+# Instalar playit.gg
 
 ```bash
-wget https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-linux-aarch64
-chmod +x playit-linux-aarch64
+cd ~/Minecraft-Server-Termux && bash playit.sh
+```
+
+# Instalar agente de playit.gg
+### Terminal 1
+
+```bash
+cd ~/playit
 ./playit-linux-aarch64 --socket-path=./playit.sock --secret-path=./playit.toml
 ```
 
 # Instalar cliente de playit.gg 
-## 2º
+### Terminal 2
 
 ```bash
-wget https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-cli-linux-aarch64
-chmod +x playit-cli-linux-aarch64
+cd ~/playit
 ./playit-cli-linux-aarch64 --socket-path=./playit.sock
 ```
 
