@@ -24,6 +24,7 @@ cd Minecraft-Server-Termux && bash install.sh
 apt update -y && apt install git -y
 git clone https://github.com/Guayand0/Minecraft-Server-Termux
 cd Minecraft-Server-Termux && bash mc.sh
+cd ~/mc-server
 ```
 
 - Entra en esta [Página Web](https://www.guayando.dev/minecraft-server-termux/), selecciona el servidor y la versión que quieras instalar, copia el comando y ejecutalo en tu terminal Debian.
