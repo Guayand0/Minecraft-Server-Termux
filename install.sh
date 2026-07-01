@@ -1,11 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-pkg install proot-distro -y
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-sleep 3
+if ! command -v pkg >/dev/null 2>&1; then
+  echo "Error: este script debe ejecutarse en Termux."
+  exit 1
+fi
 
+if ! command -v proot-distro >/dev/null 2>&1; then
+  echo "Instalando proot-distro..."
+  pkg update -y
+  pkg install -y proot-distro
+fi
+
+echo "Preparando Debian..."
 proot-distro install debian
 
-echo -e "\e[1;32mDebian installed successfully!\e[0m"
-cp debian.sh ~/
-bash debian.sh
+install -m 755 "$SCRIPT_DIR/debian.sh" "$HOME/debian.sh"
+
+echo "Debian listo. Para entrar mas tarde, usa: bash ~/debian.sh"
+echo "Abriendo Debian ahora..."
+bash "$HOME/debian.sh"
