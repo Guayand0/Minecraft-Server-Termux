@@ -57,6 +57,14 @@ Cuando `server.jar` ya exista en `~/mc-server`, arranca el servidor con:
 bash start.sh
 ```
 
+La primera vez, deja que el servidor termine de iniciar para que cree `server.properties`. Después, escribe `stop` en la consola del servidor y, desde `~/mc-server`, ejecuta:
+
+```bash
+bash properties.sh
+```
+
+El script cambia a `false` las propiedades `online-mode` y `white-list`, y fija `simulation-distance` en `5`, siempre que esas propiedades existan en `server.properties`. Luego vuelve a iniciar el servidor con `bash start.sh`.
+
 Puedes cambiar la RAM sin editar el script:
 
 ```bash
