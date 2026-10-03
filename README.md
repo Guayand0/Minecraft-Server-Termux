@@ -93,6 +93,12 @@ bash playit.sh
 - `armv7` o `armv7l`
 - `i686` o `i386`
 
+Para ver el nombre de arquitectura que debes usar en los comandos del agente y del cliente, ejecuta:
+
+```bash
+bash arquitectura.sh
+```
+
 ## 6. Terminales necesarias
 
 Para jugar con acceso externo vas a usar 3 terminales:
