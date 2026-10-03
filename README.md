@@ -35,7 +35,7 @@ bash mc.sh
 cd ~/mc-server
 ```
 
-`mc.sh` instala Java si hace falta, crea `~/mc-server` y copia los scripts base del servidor.
+`mc.sh` instala Java si hace falta, crea `~/mc-server` y copia los scripts base del servidor, incluidos `properties.sh` e `ip.sh`.
 
 ## 3. Descargar el archivo del servidor
 
@@ -64,6 +64,12 @@ bash properties.sh
 ```
 
 El script cambia a `false` las propiedades `online-mode` y `white-list`, y fija `simulation-distance` en `5`, siempre que esas propiedades existan en `server.properties`. Luego vuelve a iniciar el servidor con `bash start.sh`.
+
+Para consultar la IPv4 local que usa la conexión activa, ya sea Wi-Fi o datos móviles, ejecuta desde `~/mc-server`:
+
+```bash
+bash ip.sh
+```
 
 Puedes cambiar la RAM sin editar el script:
 

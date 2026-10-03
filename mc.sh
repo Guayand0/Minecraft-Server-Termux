@@ -10,6 +10,7 @@ mkdir -p "$SERVER_DIR"
 
 install -m 755 "$SCRIPT_DIR/start.sh" "$SERVER_DIR/start.sh"
 install -m 755 "$SCRIPT_DIR/properties.sh" "$SERVER_DIR/properties.sh"
+install -m 755 "$SCRIPT_DIR/ip.sh" "$SERVER_DIR/ip.sh"
 install -m 644 "$SCRIPT_DIR/eula.txt" "$SERVER_DIR/eula.txt"
 
 echo "Carpeta del servidor lista en: $SERVER_DIR"
